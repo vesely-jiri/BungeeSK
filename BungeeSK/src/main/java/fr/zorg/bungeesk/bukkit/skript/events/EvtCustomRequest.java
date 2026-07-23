@@ -3,10 +3,8 @@ package fr.zorg.bungeesk.bukkit.skript.events;
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Getter;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.CustomRequestEvent;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
-import org.jetbrains.annotations.Nullable;
 
 public class EvtCustomRequest {
 
@@ -23,21 +21,9 @@ public class EvtCustomRequest {
                 .since("2.0.0");
 
 
-        EventValues.registerEventValue(CustomRequestEvent.class, String.class, new Getter<String, CustomRequestEvent>() {
-            @Nullable
-            @Override
-            public String get(CustomRequestEvent e) {
-                return e.getName();
-            }
-        }, 0);
+        EventValues.registerEventValue(CustomRequestEvent.class, String.class, CustomRequestEvent::getName);
 
-        EventValues.registerEventValue(CustomRequestEvent.class, BungeeServer.class, new Getter<BungeeServer, CustomRequestEvent>() {
-            @Nullable
-            @Override
-            public BungeeServer get(CustomRequestEvent e) {
-                return e.getFrom();
-            }
-        }, 0);
+        EventValues.registerEventValue(CustomRequestEvent.class, BungeeServer.class, CustomRequestEvent::getFrom);
     }
 
 }

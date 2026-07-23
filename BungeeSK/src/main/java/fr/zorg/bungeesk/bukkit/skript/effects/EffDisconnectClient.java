@@ -30,8 +30,8 @@ public class EffDisconnectClient extends Effect {
 
     @Override
     protected void execute(Event e) {
-        if (PacketClient.isConnected())
-            PacketClient.getClient().disconnect();
+        // Also disables auto-reconnect, so an explicit disconnect stays disconnected.
+        PacketClient.stop();
     }
 
     @Override

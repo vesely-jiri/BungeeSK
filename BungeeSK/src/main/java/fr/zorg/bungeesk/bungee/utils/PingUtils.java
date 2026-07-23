@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -77,7 +77,7 @@ public class PingUtils {
 
     private static Favicon generateFavicon(String url) {
         try {
-            final BufferedImage image = ImageIO.read(new URL(url));
+            final BufferedImage image = ImageIO.read(URI.create(url).toURL());
             return Favicon.create(image);
 
         } catch (IOException ignored) {

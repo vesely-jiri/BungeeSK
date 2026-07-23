@@ -3,11 +3,9 @@ package fr.zorg.bungeesk.bukkit.skript.events;
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Getter;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.ServerSwitchEvent;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
-import org.jetbrains.annotations.Nullable;
 
 public class EvtServerSwitch {
 
@@ -19,21 +17,9 @@ public class EvtServerSwitch {
                 .since("1.0.0");
 
 
-        EventValues.registerEventValue(ServerSwitchEvent.class, BungeePlayer.class, new Getter<BungeePlayer, ServerSwitchEvent>() {
-            @Nullable
-            @Override
-            public BungeePlayer get(ServerSwitchEvent e) {
-                return e.getPlayer();
-            }
-        }, 0);
+        EventValues.registerEventValue(ServerSwitchEvent.class, BungeePlayer.class, ServerSwitchEvent::getPlayer);
 
-        EventValues.registerEventValue(ServerSwitchEvent.class, BungeeServer.class, new Getter<BungeeServer, ServerSwitchEvent>() {
-            @Nullable
-            @Override
-            public BungeeServer get(ServerSwitchEvent e) {
-                return e.getServer();
-            }
-        }, 0);
+        EventValues.registerEventValue(ServerSwitchEvent.class, BungeeServer.class, ServerSwitchEvent::getServer);
     }
 
 }

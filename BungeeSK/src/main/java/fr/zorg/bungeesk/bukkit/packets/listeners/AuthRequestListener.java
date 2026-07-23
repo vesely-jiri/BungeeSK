@@ -22,8 +22,8 @@ public class AuthRequestListener extends BungeeSKBukkitListener {
                 final UUID uuid = EncryptionUtils.decryptUUID(encryptedUUID, PacketClient.getBuilder().getPassword());
                 PacketClient.sendPacket(new AuthResponsePacket(uuid));
             } catch (GeneralSecurityException ex) {
-                BungeeSK.getInstance().getLogger().severe("§7Connection error: §cWrong password");
-                PacketClient.getClient().disconnect();
+                BungeeSK.getInstance().getLogger().severe("Connection refused by the proxy: wrong password. Fix the password in config.yml or your script, then reconnect.");
+                PacketClient.stop();
             }
         }
     }

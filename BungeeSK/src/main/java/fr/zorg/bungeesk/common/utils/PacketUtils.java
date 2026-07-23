@@ -31,7 +31,7 @@ public class PacketUtils {
         ObjectInput objectInput = null;
         BungeeSKPacket packet = null;
         try {
-            objectInput = new ObjectInputStream(byteArrayInputStream);
+            objectInput = SafeSerialization.createFilteredStream(byteArrayInputStream);
             packet = (BungeeSKPacket) objectInput.readObject();
             byteArrayInputStream.close();
         } catch (IOException | ClassNotFoundException ex) {

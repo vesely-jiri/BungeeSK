@@ -24,7 +24,7 @@ import java.time.Duration;
 @Plugin(
         id = "bungeesk",
         name = "BungeeSK",
-        version = "2.0.0",
+        version = "2.1.0",
         authors = {"Zorg"},
         url = "https://github.com/ZorgBtw/BungeeSK"
 )

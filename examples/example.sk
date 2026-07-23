@@ -1,0 +1,55 @@
+# ============================================================
+#  BungeeSK 2.1.0 — example script (game-server side)
+#  Put this in plugins/Skript/scripts/ on a Paper/Spigot server.
+# ============================================================
+
+# --- Connecting -------------------------------------------------------------
+# EASIEST: don't script the connection at all — set connection.auto-connect: true
+# in plugins/BungeeSK/config.yml and BungeeSK connects + auto-reconnects for you.
+#
+# Or connect from a script (auto-reconnect still applies, no while-loop needed):
+on load:
+    create new bungee connection:
+        set address of connection to "127.0.0.1"
+        set port of connection to 20000
+        set password of connection to "YourStrongPassword"
+    start new connection with connection
+
+# --- Connection status & control (new in 2.1.0) ----------------------------
+command /proxystatus:
+    trigger:
+        send "Connection state: %bungee connection state%"
+        if client is connected:
+            send "&aLinked to the proxy."
+        else:
+            send "&cNot linked."
+
+command /proxyreconnect:
+    trigger:
+        reconnect to the proxy
+        send "&eReconnecting..."
+
+command /proxydisconnect:
+    trigger:
+        disconnect the client   # also disables auto-reconnect until you reconnect
+        send "&7Disconnected."
+
+# --- Colors: hex (both proxies) & MiniMessage (Velocity) --------------------
+on bungee player join:
+    broadcast "&#55ff55%event-bungeeplayer% joined the network" to the network
+    # MiniMessage (rendered on Velocity):
+    broadcast "<gradient:#00ffcc:#0066ff>Welcome!</gradient>" to the network
+
+# --- Network / cross-server helpers (already available) ---------------------
+command /lobbycount:
+    trigger:
+        set {_players::*} to all bungee players on bungee server named "lobby"
+        send "Lobby has %size of {_players::*}% players."
+
+command /hub:
+    trigger:
+        send bungee player named player's name to bungee server named "hub"
+
+command /announce <text>:
+    trigger:
+        make all servers execute console command "say %arg-1%"

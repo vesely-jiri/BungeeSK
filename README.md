@@ -1,29 +1,135 @@
-<h2 align="center">BungeeSK</h2> 
-BungeeSK is a Skript addon that allows you to communicate with a bungeecord proxy easily !
+<h2 align="center">BungeeSK</h2>
+<p align="center">A Skript addon to talk to your BungeeCord <em>or</em> Velocity proxy from your game servers.</p>
 
-<br>
+<p align="center">
+  <img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-1.21.11%20(Paper)-brightgreen">
+  <img alt="Java" src="https://img.shields.io/badge/Java-21-orange">
+  <img alt="Skript" src="https://img.shields.io/badge/Skript-2.16%2B-blue">
+  <img alt="Version" src="https://img.shields.io/badge/BungeeSK-2.1.0-lightgrey">
+</p>
 
-## 📥 How to download and install ?
-You can download the last available version of BungeeSK by clicking [here](https://github.com/ZorgBtw/BungeeSK/releases/latest).
-Then you can drop your `BungeeSK.jar` file in your Bungeecord `plugins/` folder and in every Spigot `plugins/` folder too. Make sure you got Skript running on your Spigot servers. (If not, you can download Skript [here](https://github.com/SkriptLang/Skript/releases/latest))
+---
 
-## 🚀 How to run correctly BungeeSK ?
-First, you will need to connect your Spigot servers (called as clients) to your Bungeecord proxy (call as server).
-Here's an example of code to link everything:
-```applescript
-on server start:
-	while client is not connected: # Using a while loop to try to connect if the client is not connected
-		create new bungee connection: # Creation of a new Bungeecord connection
-			set address of connection to "127.0.0.1" # Use this IP if the Bungeecord is on the same machine
-			set port of connection to 20000 # This port as to be opened if the specified client is not hosted on the same machine as the server
-			set password of connection to "Strong password" # Complete your password here, this has to be the same as the one in the Bungeecord config
-		start new connection with last created connection # Sending connection request to the server
-		wait 30 seconds # Waiting 30 seconds between 2 connection tries, it's recommended to not decrease this value
+## ✅ Compatibility
+
+| Component        | Supported                                                                 |
+|------------------|---------------------------------------------------------------------------|
+| Game servers     | **Paper / Spigot 1.21.11** (built against `paper-api`). Forward-compatible with the 26.x line as long as Skript itself supports it. |
+| Skript           | **2.16.0+** (required for 1.21.x)                                          |
+| Java             | **21** (required by Minecraft 1.21+)                                       |
+| Proxies          | **BungeeCord / Waterfall** and **Velocity 3.4+**                          |
+
+> **26.1+ note:** BungeeSK uses only stable Bukkit + Skript API (no version-specific NMS), so the same `BungeeSK.jar` is expected to keep working on newer game versions once your Paper build and Skript support them. Run the newest Skript for the newest Minecraft.
+
+## 📥 Downloads
+
+Two jars are produced:
+
+| Jar                     | Where it goes                                                       |
+|-------------------------|---------------------------------------------------------------------|
+| `BungeeSK.jar`          | Every **game server** (`plugins/`) **and** your **BungeeCord** proxy (`plugins/`). One jar, both roles. |
+| `BungeeSK-Velocity.jar` | Your **Velocity** proxy (`plugins/`).                               |
+
+Grab them from the [latest release](https://github.com/ZorgBtw/BungeeSK/releases/latest), or [build from source](#-building-from-source). Make sure [Skript](https://github.com/SkriptLang/Skript/releases/latest) is installed on every game server.
+
+## 🚀 Getting connected
+
+Pick **one** of the two ways to link a game server to the proxy.
+
+### Option A — config.yml (recommended, new in 2.1.0)
+
+On each game server, edit `plugins/BungeeSK/config.yml`:
+
+```yaml
+connection:
+  auto-connect: true          # connect automatically on server start
+  address: "127.0.0.1"        # proxy address (127.0.0.1 if same machine)
+  port: 20000                 # must match the proxy's config.yml
+  password: "YourStrongPassword"   # must match the proxy's config.yml
+reconnect:
+  enabled: true               # auto-reconnect if the link drops
+  initial-delay-seconds: 5
+  max-delay-seconds: 60
 ```
 
-## 📚 Need support or be informed ?
+No script needed — the server connects on start and **keeps itself reconnected** with exponential backoff.
+
+### Option B — from a script
+
+```applescript
+on load:
+    create new bungee connection:
+        set address of connection to "127.0.0.1"
+        set port of connection to 20000
+        set password of connection to "YourStrongPassword"
+    start new connection with connection
+```
+
+Unlike older versions, you **no longer need a manual `while` retry loop** — auto-reconnect is built in. If the proxy is offline when you connect, BungeeSK keeps retrying on its own.
+
+## 🆕 What's new in 2.1.0
+
+- **Runs on Minecraft 1.21.11 / Paper / Java 21** (updated from 1.20 / Java 11); built with Skript 2.16, Gradle 9.6.1, and the maintained `com.gradleup.shadow`.
+- **Auto-reconnect** with exponential backoff — no more manual retry loops. A wrong password stops the loop (and tells you).
+- **`config.yml`** on the game-server side with **auto-connect**.
+- **Connection status & control** from Skript:
+  - `bungee connection state` → `"connected"`, `"connecting"`, `"reconnecting"`, `"disconnected"`
+  - `reconnect to the proxy`
+  - `disconnect the client` now also disables auto-reconnect (stays disconnected until you reconnect)
+- **Hex & MiniMessage colors** in messages/titles/action bars/broadcasts:
+  - Hex `&#ff5555` works on **both** proxies.
+  - MiniMessage (`<gradient:...>`, `<#ff0000>`, `<bold>` …) works on **both** proxies (native Adventure on Velocity; a shaded, relocated Adventure on BungeeCord).
+- **Security hardening:** Java deserialization is now whitelisted (BungeeSK/JDK types only) at every socket read — closes a pre-authentication remote-code-execution vector.
+- **Performance/stability:** a shared async thread pool (instead of a new thread per packet) and serialized socket writes (fixes a latent stream-corruption race).
+- The update checker now actually works (it was silently 403'd by GitHub for missing a `User-Agent`) and never blocks or spams startup.
+
+## 🎨 Colors & formatting
+
+```applescript
+# Hex — works on BungeeCord and Velocity:
+send bungee message "&#ff5555Hello in red-ish!" to {_bungeeplayer}
+
+# MiniMessage (hex, gradients, …) — works on both Velocity and BungeeCord:
+send bungee message "<gradient:#ff0000:#0000ff>Gradient text</gradient>" to {_bungeeplayer}
+broadcast "<rainbow>Welcome to the network!</rainbow>" to the network
+```
+
+## 🧩 Handy syntaxes (already available)
+
+```applescript
+broadcast "&aHello network!" to the network
+broadcast bungee message "&eServer message" to bungee server named "lobby"
+send %bungeeplayer% action bar message "&bWelcome!"
+send bungeecord title "&6Title" with subtitle "&7Subtitle" to {_bungeeplayer}
+
+set {_players::*} to all bungee players on bungee server named "lobby"
+send {_bungeeplayer} to bungee server named "hub"
+make all servers execute console command "say hi"
+make %bungeeplayer% execute command "spawn"
+send custom message "hello" to {_bungeeservers::*}
+```
+
+See the full documentation on [SkriptHub](https://skripthub.net/docs/?addon=BungeeSK) and [skUnity](https://docs.skunity.com/syntax/search/addon:bungeesk).
+
+## 🔧 Building from source
+
+Requires **JDK 21**. From the repo root:
+
+```bash
+./gradlew :BungeeSK:shadowJar :VelocitySK:shadowJar
+```
+
+Outputs:
+- `BungeeSK/build/libs/BungeeSK.jar`
+- `VelocitySK/build/libs/BungeeSK-Velocity.jar`
+
+> **Windows + OneDrive:** if the project lives inside a OneDrive-synced folder, the sync client can lock `build/` and break Gradle. Redirect build output out of the synced folder:
+> ```bash
+> ./gradlew :BungeeSK:shadowJar :VelocitySK:shadowJar -PbuildDirBase=C:/Users/you/AppData/Local/bungeesk-build
+> ```
+
+## 📚 Support
+
 - [**Discord server**](https://discord.gg/PCnyMDsTRA)
 - [**Wiki**](https://bungeesk.zorgdev.fr)
-- Documentations:<br>
-<a href="http://skripthub.net/docs/?addon=BungeeSK" target="_blank"> <img src="http://skripthub.net/static/addon/ViewTheDocsButton.png" height="75"></img></a>
-<a href="https://docs.skunity.com/syntax/search/addon:bungeesk" target="_blank"> <img src="https://skunity.com/branding/buttons/get_on_docs_3.png" height="75"></img></a>
+- Docs: [SkriptHub](https://skripthub.net/docs/?addon=BungeeSK) · [skUnity](https://docs.skunity.com/syntax/search/addon:bungeesk)

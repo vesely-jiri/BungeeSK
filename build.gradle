@@ -1,30 +1,30 @@
-plugins {
-    id "java"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
-}
-
 allprojects {
     group = "fr.zorg"
-    version = "2.0.0"
-}
+    version = "2.1.0"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+    repositories {
+        mavenCentral()
+        maven { url = "https://jitpack.io" }
+        maven { url = "https://repo.papermc.io/repository/maven-public/" }
+        maven { url = "https://repo.skriptlang.org/releases" }
+    }
+
+    // Windows/OneDrive workaround: when the project sits inside a OneDrive-synced folder, the
+    // sync client keeps handles open on build/classes/**, which makes Gradle fail with
+    // "Unable to delete directory". Pass -PbuildDirBase=<some local, non-synced path> to move
+    // all build outputs out of the synced folder. CI leaves it unset and uses the default build/.
+    if (project.hasProperty("buildDirBase")) {
+        def sub = project.path == ":" ? "root" : project.path.substring(1).replace(":", "_")
+        layout.buildDirectory = file("${project.buildDirBase}/${sub}")
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url = "https://jitpack.io" }
-}
-
-dependencies {
-    implementation project(path: ":VelocitySK", configuration: "shadow") //BungeeSK already included inside VelocitySK
-}
-
-[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-
-shadowJar {
-    archiveFileName = "BungeeSK.jar"
+// The root project is a pure parent/aggregator. The distributable jars are produced by the
+// subprojects' shadowJar tasks:
+//   :BungeeSK:shadowJar   -> BungeeSK/build/libs/BungeeSK.jar          (game servers + BungeeCord)
+//   :VelocitySK:shadowJar -> VelocitySK/build/libs/BungeeSK-Velocity.jar (Velocity proxy)
+tasks.register("buildAll") {
+    group = "build"
+    description = "Builds both distributable jars (BungeeSK.jar + BungeeSK-Velocity.jar)."
+    dependsOn ":BungeeSK:shadowJar", ":VelocitySK:shadowJar"
 }

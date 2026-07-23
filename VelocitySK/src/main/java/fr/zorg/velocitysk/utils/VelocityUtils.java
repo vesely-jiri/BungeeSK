@@ -11,8 +11,8 @@ import fr.zorg.velocitysk.packets.SocketServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -20,6 +20,61 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityUtils {
+
+    /**
+     * Legacy serializer used to render '&' colour/format codes, including hex colours in
+     * both the {@code &#rrggbb} and the {@code &x&r&r&g&g&b&b} forms.
+     */
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
+            .character('&')
+            .hexColors()
+            .useUnusualXRepeatedCharacterHexFormat()
+            .build();
+
+    /**
+     * Converts a raw format string into an Adventure {@link Component} following this precedence:
+     * <ol>
+     *     <li>If the string contains a MiniMessage tag (a {@code '<'} followed later by a {@code '>'}),
+     *     it is parsed as <b>MiniMessage</b>. This is only supported on Velocity, which ships MiniMessage
+     *     natively via {@code velocity-api}. On BungeeCord MiniMessage is unavailable (no extra deps), so
+     *     there such strings fall back to legacy parsing.</li>
+     *     <li>Otherwise the string is parsed as <b>legacy</b> {@code '&'} colour/format codes, with hex
+     *     colours supported in both the {@code &#rrggbb} and {@code &x&r&r&g&g&b&b} forms.</li>
+     * </ol>
+     * Null or empty input yields an empty component.
+     *
+     * @param text the raw format string (may be null)
+     * @return the rendered component, never null
+     */
+    public static Component format(String text) {
+        if (text == null || text.isEmpty())
+            return Component.empty();
+        if (hasMiniMessageTag(text))
+            return MiniMessage.miniMessage().deserialize(text);
+        return LEGACY.deserialize(text);
+    }
+
+    /**
+     * Renders a format string down to a plain (unformatted) String, useful for console/log output.
+     * Applies the same precedence as {@link #format(String)} and then strips all styling.
+     *
+     * @param text the raw format string (may be null)
+     * @return the plain text, never null
+     */
+    public static String formatPlain(String text) {
+        if (text == null || text.isEmpty())
+            return "";
+        return PlainTextComponentSerializer.plainText().serialize(format(text));
+    }
+
+    /**
+     * Heuristic: does this string look like it contains a MiniMessage tag, i.e. a {@code '<'}
+     * followed somewhere later by a {@code '>'}.
+     */
+    private static boolean hasMiniMessageTag(String text) {
+        final int open = text.indexOf('<');
+        return open >= 0 && text.indexOf('>', open + 1) > open;
+    }
 
     public static Player getPlayer(BungeePlayer bungeePlayer) {
         final Optional<Player> player = BungeeSK.getServer().getPlayer(bungeePlayer.getName());
@@ -40,10 +95,15 @@ public class VelocityUtils {
         return new BungeePlayer(player.getUsername(), player.getUniqueId());
     }
 
+    /**
+     * Builds a single component from one or more format strings, joining them with newlines.
+     * Each string is rendered through {@link #format(String)} (MiniMessage if it contains a tag,
+     * otherwise legacy {@code '&'} codes with hex support).
+     */
     public static Component getTextComponent(String... text) {
         final TextComponent.Builder builder = Component.text();
         for (int i = 0; i < text.length; i++) {
-            builder.append(LegacyComponentSerializer.legacySection().deserialize(text[i]).asComponent());
+            builder.append(format(text[i]));
             if (i != text.length - 1)
                 builder.appendNewline();
         }

@@ -1,31 +1,19 @@
 plugins {
     id "java"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gradleup.shadow" version "9.6.1"
 }
-
-group = "fr.zorg"
-version = parent.version
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url = "https://jitpack.io" }
-    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
-    maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url = "https://repo.destroystokyo.com/repository/maven-public/" }
-    maven { url = "https://repo.skriptlang.org/releases" }
-}
-
 dependencies {
-    compileOnly group: "org.spigotmc", name: "spigot-api", version: "1.20-R0.1-SNAPSHOT"
-    compileOnly group: "net.md-5", name: "bungeecord-api", version: "1.20-R0.1-SNAPSHOT"
-    compileOnly group: "org.jetbrains", name: "annotations", version: "22.0.0"
-    compileOnly(group: "com.github.SkriptLang", name: "Skript", version: "2.9.5") {
+    compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.11-R0.1-SNAPSHOT"
+    compileOnly group: "net.md-5", name: "bungeecord-api", version: "1.21-R0.4"
+    compileOnly group: "org.jetbrains", name: "annotations", version: "24.1.0"
+    compileOnly(group: "com.github.SkriptLang", name: "Skript", version: "2.16.0") {
         exclude group: "com.sk89q.worldguard", module: "worldguard-legacy"
         exclude group: "net.milkbowl.vault", module: "Vault"
     }
@@ -34,14 +22,35 @@ dependencies {
     implementation group: "com.github.rockaport", name: "alice", version: "0.9.0"
     implementation group: "com.github.Carleslc.Simple-YAML", name: "Simple-Yaml", version: "1.8.4"
     implementation group: "io.methvin", name: "directory-watcher", version: "0.15.1"
-    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.42.0.0"
+    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.47.1.0"
+
+    // MiniMessage rendering for the BungeeCord side. Relocated (see shadowJar) so the shaded copy
+    // can't clash with the Adventure that Paper already provides on the game-server side. Velocity
+    // provides its own Adventure, so these are not added to the VelocitySK module.
+    implementation group: "net.kyori", name: "adventure-api", version: "4.17.0"
+    implementation group: "net.kyori", name: "adventure-text-minimessage", version: "4.17.0"
+    // Used to render MiniMessage to chat-component JSON, which BungeeCord's own ComponentSerializer
+    // then parses into BaseComponent[]. gson itself is provided by BungeeCord/Paper at runtime.
+    implementation(group: "net.kyori", name: "adventure-text-serializer-gson", version: "4.17.0") {
+        exclude group: "com.google.code.gson"
+    }
 }
 
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 shadowJar {
-    archiveFileName = "BungeeSK_Bungee.jar"
+    archiveFileName = "BungeeSK.jar"
+
+    // Keep the shaded Adventure away from Paper's own net.kyori classes.
+    relocate "net.kyori", "fr.zorg.shaded.kyori"
+    // Adventure resolves MiniMessage / serializer implementations via ServiceLoader; this relocates
+    // the META-INF/services provider files to match the shaded package (otherwise the providers are
+    // not found at runtime and MiniMessage silently fails).
+    mergeServiceFiles()
+
     minimize {
         exclude dependency("org.xerial:sqlite-jdbc:.*")
+        // MiniMessage resolves tags via reflection/services; don't let minimize strip it.
+        exclude dependency("net.kyori:.*")
     }
 }

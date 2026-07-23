@@ -1,6 +1,6 @@
 name: Java auto build with Gradle
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -8,19 +8,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.1.1
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3.13.0
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
-          distribution: "adopt"
-          java-package: jdk
+          java-version: "21"
+          distribution: "temurin"
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle, using shadowJar
-        run: ./gradlew clean shadowJar
-      - name: Upload artifact
+      - name: Build both distributable jars
+        run: ./gradlew clean :BungeeSK:shadowJar :VelocitySK:shadowJar --no-daemon
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: BungeeSK
-          path: build/libs/**
+          path: |
+            BungeeSK/build/libs/BungeeSK.jar
+            VelocitySK/build/libs/BungeeSK-Velocity.jar

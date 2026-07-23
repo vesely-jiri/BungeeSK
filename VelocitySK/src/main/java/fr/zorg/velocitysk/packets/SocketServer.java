@@ -4,6 +4,7 @@ import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.bungeesk.common.packets.*;
 import fr.zorg.bungeesk.common.utils.EncryptionUtils;
 import fr.zorg.bungeesk.common.utils.PacketUtils;
+import fr.zorg.bungeesk.common.utils.SafeSerialization;
 import fr.zorg.velocitysk.BungeeSK;
 import fr.zorg.velocitysk.commands.BungeeSKCommand;
 import fr.zorg.velocitysk.utils.BungeeConfig;
@@ -50,7 +51,7 @@ public class SocketServer {
         if (!this.socket.isClosed()) {
             try {
                 this.writer = new ObjectOutputStream(socket.getOutputStream());
-                this.reader = new ObjectInputStream(socket.getInputStream());
+                this.reader = SafeSerialization.createFilteredStream(socket.getInputStream());
                 this.readThread.start();
                 Debug.log("ClientSocket started on " + socket.getInetAddress().getHostAddress());
 

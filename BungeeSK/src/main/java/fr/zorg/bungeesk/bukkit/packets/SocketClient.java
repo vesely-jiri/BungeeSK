@@ -6,11 +6,13 @@ import fr.zorg.bungeesk.common.packets.AuthCompletePacket;
 import fr.zorg.bungeesk.common.packets.BungeeSKPacket;
 import fr.zorg.bungeesk.common.utils.EncryptionUtils;
 import fr.zorg.bungeesk.common.utils.PacketUtils;
+import fr.zorg.bungeesk.common.utils.SafeSerialization;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SocketClient {
@@ -20,14 +22,21 @@ public class SocketClient {
     private ObjectInputStream reader;
     private Thread readThread;
     private boolean encrypting;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     public SocketClient(Socket socket) {
         this.socket = socket;
         this.encrypting = false;
         try {
+            // The output stream must be created (and its header flushed) before the input stream,
+            // otherwise both peers block in the ObjectInputStream constructor. The input stream is
+            // wrapped with a deserialization whitelist (see SafeSerialization) because the first
+            // reads happen before authentication.
             this.writer = new ObjectOutputStream(socket.getOutputStream());
-            this.reader = new ObjectInputStream(socket.getInputStream());
-            this.readThread = new Thread(this::read);
+            this.writer.flush();
+            this.reader = SafeSerialization.createFilteredStream(socket.getInputStream());
+            this.readThread = new Thread(this::read, "BungeeSK-SocketReader");
+            this.readThread.setDaemon(true);
             this.readThread.start();
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -38,7 +47,7 @@ public class SocketClient {
     public void read() {
         while (this.isConnected()) {
             try {
-                Object dataRaw = this.reader.readObject();
+                final Object dataRaw = this.reader.readObject();
                 final AtomicReference<?> dataAtomic = new AtomicReference<>(dataRaw);
                 BungeeSK.runAsync(() -> {
                     Object data = dataAtomic.get();
@@ -60,52 +69,65 @@ public class SocketClient {
                 });
             } catch (IOException | ClassNotFoundException ex) {
                 this.disconnect();
+                return;
             }
         }
     }
 
     public void sendPacket(BungeeSKPacket packet) {
         BungeeSK.runAsync(() -> {
-            if (this.isConnected()) {
-                this.handleSendListeners(packet);
+            if (!this.isConnected())
+                return;
+            this.handleSendListeners(packet);
 
-                Object toSend = packet;
-                if (this.encrypting) {
-                    toSend = EncryptionUtils.encryptPacket(PacketUtils.packetToBytes(packet), PacketClient.getBuilder().getPassword());
-                    if (toSend == null)
-                        return;
-                }
-                try {
+            Object toSend = packet;
+            if (this.encrypting) {
+                toSend = EncryptionUtils.encryptPacket(PacketUtils.packetToBytes(packet), PacketClient.getBuilder().getPassword());
+                if (toSend == null)
+                    return;
+            }
+            try {
+                // ObjectOutputStream is not thread-safe and several async tasks may send at once.
+                synchronized (this.writer) {
                     this.writer.writeObject(toSend);
-                } catch (IOException ignored) {
+                    this.writer.flush();
                 }
+            } catch (IOException ex) {
+                this.disconnect();
+                return;
+            }
 
-                if (packet instanceof AuthCompletePacket) {
-                    setEncrypting(((AuthCompletePacket) packet).isEncrypting());
-                }
+            if (packet instanceof AuthCompletePacket) {
+                setEncrypting(((AuthCompletePacket) packet).isEncrypting());
             }
         });
     }
 
     public void disconnect() {
-        if (this.isConnected()) {
-            try {
-                if (this.reader != null)
-                    this.reader.close();
-                if (this.writer != null)
-                    this.writer.close();
-                if (this.readThread != null)
-                    this.readThread.interrupt();
-                this.socket.close();
-                PacketClient.resetSocket();
-                BungeeSK.callEvent(new ClientDisconnectEvent());
-            } catch (IOException ignored) {
-            }
+        if (!this.closed.compareAndSet(false, true))
+            return;
+        try {
+            if (this.reader != null)
+                this.reader.close();
+        } catch (IOException ignored) {
         }
+        try {
+            if (this.writer != null)
+                this.writer.close();
+        } catch (IOException ignored) {
+        }
+        if (this.readThread != null)
+            this.readThread.interrupt();
+        try {
+            this.socket.close();
+        } catch (IOException ignored) {
+        }
+        PacketClient.notifyDisconnected(this);
+        BungeeSK.callEvent(new ClientDisconnectEvent());
     }
 
     public boolean isConnected() {
-        return this.socket != null && this.socket.isConnected() && !this.socket.isClosed();
+        return !this.closed.get() && this.socket != null && this.socket.isConnected() && !this.socket.isClosed();
     }
 
     private void handleSendListeners(BungeeSKPacket packet) {

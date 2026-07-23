@@ -3,10 +3,8 @@ package fr.zorg.bungeesk.bukkit.skript.events;
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Getter;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeeServerStopEvent;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
-import org.jetbrains.annotations.Nullable;
 
 public class EvtBungeeServerStop {
 
@@ -17,13 +15,7 @@ public class EvtBungeeServerStop {
                 .examples("on bungee server stop:", "\tset {_server} to event-bungeeserver")
                 .since("2.0.0");
 
-        EventValues.registerEventValue(BungeeServerStopEvent.class, BungeeServer.class, new Getter<BungeeServer, BungeeServerStopEvent>() {
-            @Nullable
-            @Override
-            public BungeeServer get(BungeeServerStopEvent e) {
-                return e.getBungeeServer();
-            }
-        }, 0);
+        EventValues.registerEventValue(BungeeServerStopEvent.class, BungeeServer.class, BungeeServerStopEvent::getBungeeServer);
     }
 
 }
