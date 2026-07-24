@@ -41,6 +41,14 @@ dependencies {
     implementation(group: "net.kyori", name: "adventure-text-serializer-gson", version: "4.17.0") {
         exclude group: "com.google.code.gson"
     }
+
+    testImplementation platform("org.junit:junit-bom:5.11.3")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
 }
 
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
