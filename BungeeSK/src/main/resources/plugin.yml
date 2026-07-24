@@ -2,7 +2,7 @@ name: BungeeSK
 author: Zorg
 main: fr.zorg.bungeesk.bukkit.BungeeSK
 website: https://github.com/ZorgBtw/BungeeSK
-version: 2.1.0
+version: 2.2.0
 api-version: 1.21
 softdepend: [ Skript, PlaceholderAPI ]
 commands:
