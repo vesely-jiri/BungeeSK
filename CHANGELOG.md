@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## 2.2.0
+
+### New Skript syntaxes
+- **Player info:** `%bungeeplayer%'s bungee ping` (latency in ms) and `%bungeeplayer%'s protocol version` (client protocol number).
+- **Player counts:** `network player count` (total online across the network) and `player count of %bungeeserver%` (one server).
+- **Broadcast title / action bar:** `broadcast title "…" [with subtitle …] [for …] [with fade-in …] [and fade-out …] to the network | to %bungeeserver%` and `broadcast action bar "…" to the network | to %bungeeserver%`.
+- **Cross-server sound & boss bar:** `play sound "<key>" [with volume N] [and pitch N] to %bungeeplayer%` and `show boss bar "<title>" [with colour …] [with style …] [with progress N] [for <timespan>] to %bungeeplayer%` (timed, auto-removes). These reach a player on any server — the proxy forwards them to the player's game server, which plays them locally.
+
+### Integrations
+- **PlaceholderAPI** (soft-depend): `%bungeesk_connected%`, `%bungeesk_state%`, `%bungeesk_network_players%` (the count comes from a small async cache so resolving a placeholder never blocks).
+- **Redis backend** for global variables (opt-in via `redis.enabled` in the proxy config) — lets several proxies share global variables. SQLite remains the default; the Redis path is fail-safe.
 
 ### Fixes
 - **Auto-reconnect no longer stalls.** A connection reset during the socket handshake used to dump a raw stack trace and then stop retrying (the failing `SocketClient` notified a not-yet-assigned client, so no further attempt was scheduled). The constructor now throws instead of swallowing the error, the read loop starts only after the client is published, and a handshake failure is logged cleanly and reschedules the next attempt.
@@ -10,7 +20,7 @@
 - **Configurable reconnect schedule.** `reconnect.delays-seconds` is a per-attempt list whose last value repeats (`[30]` = a fixed 30s, `[5, 10, 20, 30]` = 5s→10s→20s→30s…); leave it empty to keep the previous exponential backoff between `initial-delay-seconds` and `max-delay-seconds`. New `reconnect.log-attempts` toggles per-attempt logging — off by default, so you get one "connection lost" and one "reconnected" message instead of a repeating warning.
 - **Admin commands.** New game-server `/bungeesk` command (`status`, `reconnect`, `disconnect`, `reload`, `version`) with tab-completion and the `bungeesk.command` permission. The proxy command is renamed to `/bungeeskproxy` (alias `/bsproxy`) so it no longer shadows the game-server `/bungeesk` on a proxied network. Both proxies also gained a `reload` subcommand (re-reads `config.yml` and restarts the listener).
 - **Structured startup banner** on all three platforms, including how long enabling took.
-- **Universal jar.** `gradlew buildAll` now also produces `BungeeSK-Universal.jar` — a single jar that runs on Paper/Spigot, BungeeCord and Velocity (it fuses the two per-platform jars; each platform loads only its own descriptor and main class).
+- **One universal jar.** `BungeeSK.jar` now runs on Paper/Spigot, BungeeCord **and** Velocity — the same file goes into `plugins/` everywhere. It is fused from two internal per-platform jars; each platform loads only its own descriptor and main class. It is also the only published artifact, and it is ~60% smaller after trimming unused SQLite native libraries.
 
 ### Internal
 - Global-variable request/response hardened: a `ConcurrentHashMap` for pending requests, a 5s (was 1s) round-trip timeout so a remote proxy is not cut off, and `PreparedStatement`s instead of string-concatenated SQL.

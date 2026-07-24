@@ -5,7 +5,7 @@
   <img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-1.21.11%20(Paper)-brightgreen">
   <img alt="Java" src="https://img.shields.io/badge/Java-21-orange">
   <img alt="Skript" src="https://img.shields.io/badge/Skript-2.16%2B-blue">
-  <img alt="Version" src="https://img.shields.io/badge/BungeeSK-2.1.0-lightgrey">
+  <img alt="Version" src="https://img.shields.io/badge/BungeeSK-2.2.0-lightgrey">
 </p>
 
 ---

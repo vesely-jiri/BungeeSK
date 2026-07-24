@@ -74,6 +74,10 @@ Every player on the given server.
 ### Player's IP — `[the] ip [address] of %bungeeplayer%` · `%bungeeplayer%'s ip [address]`
 ### Player's server — `[the] server of %bungeeplayer%` · `%bungeeplayer%'s server`
 Available ~2 ticks after join.
+### Player's ping — `[the] bungee ping of %bungeeplayer%` · `%bungeeplayer%'s bungee ping`
+Latency to the proxy, in milliseconds. *(2.2.0)*
+### Player's protocol version — `[the] protocol [version] of %bungeeplayer%` · `%bungeeplayer%'s protocol [version]`
+Client protocol number (e.g. 767 for 1.21). *(2.2.0)*
 
 ### All bungee servers — `[(all [[of] the]|the)] [bungee] servers`
 ### Server by name — `bungee[ ]server (with name|named) %string%`
@@ -84,6 +88,11 @@ Available ~2 ticks after join.
 ### Server's address — `[the] bungee address of %bungeeserver%` · `%bungeeserver%'s bungee address`
 ### Server's port — `[the] bungee port of %bungeeserver%` · `%bungeeserver%'s bungee port`
 ### Server's MOTD — `[the] bungee motd of %bungeeserver%` · `%bungeeserver%'s bungee motd`
+
+### Network player count — `[the] (network|total) [online] [bungee] player[s] count`
+Total players online across the network. *(2.2.0)*
+### Server player count — `[the] [bungee] player[s] count (of|on) %bungeeserver%` · `%bungeeserver%'s [bungee] player[s] count`
+Players connected to a specific server. *(2.2.0)*
 
 ### Global variable — `global var[iable] [named] %string%` · *(settable)*
 Get/set/delete a variable stored globally on the proxy; value may be any serializable type. See **[Global Variables & Scripts](Global-Variables-and-Scripts)**.
@@ -132,6 +141,10 @@ Disconnects and disables auto-reconnect.
 ### Send message — `send bungee message %string% to %bungeeplayer%`
 ### Send action bar — `send %bungeeplayer% action bar [message] %string%`
 ### Send title — `send bungee[cord] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayer% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]`
+### Play sound *(2.2.0)* — `(play|send) [bungee] sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayer%`
+Plays a sound (namespaced key, e.g. `entity.experience_orb.pickup`) to a player on any server.
+### Show boss bar *(2.2.0)* — `show boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayer%`
+Shows a timed boss bar (auto-removes) to a player on any server. Colour: pink/blue/red/green/yellow/purple/white; style: solid/segmented_6/…
 
 ### Send player to server — `send %bungeeplayer% to %bungeeserver%`
 ### Kick player — `kick %bungeeplayer% from bungee[cord] [(due to|because of) %-string%]`
@@ -145,6 +158,8 @@ Disconnects and disables auto-reconnect.
 
 ### Broadcast to network — `broadcast %string% to [the] network`
 ### Broadcast to server — `broadcast bungee message %string% to %bungeeserver%`
+### Broadcast title *(2.2.0)* — `broadcast [bungee[cord]] title %string% [with subtitle %-string%] [for %-timespan%] [with fade-in %-timespan%] [(and|with) fade-out %-timespan%] to [the] network` (or `… to %bungeeserver%`)
+### Broadcast action bar *(2.2.0)* — `broadcast [bungee[cord]] action bar [message] %string% to [the] network` (or `… to %bungeeserver%`)
 ### Custom message — `send custom message %string% to %bungeeservers%`
 Received via the message-receive event.
 ### To proxy console — `send %string% to bungee console`

@@ -24,6 +24,8 @@ delete global variable "event.active"
 
 > These are stored on the proxy — if a game server is offline, its `set` simply doesn't happen until it reconnects; reads always reflect the proxy's current value.
 
+**Storage backend:** by default global variables live in a small SQLite file on the proxy (`plugins/BungeeSK/variables.db`). Set `redis.enabled: true` in the proxy `config.yml` to store them in **Redis** instead — useful when several proxies should share the same global variables. See **[Configuration](Configuration)**.
+
 ## Global scripts
 
 Global scripts live in `plugins/BungeeSK/scripts/` **on the proxy** and are synchronised out to game servers, so you can manage shared logic in one place.

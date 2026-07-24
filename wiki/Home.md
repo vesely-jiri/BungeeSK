@@ -26,7 +26,8 @@ command /hub:
 - **[Commands](Commands)** — `/bungeesk` (game server) and `/bungeeskproxy` (proxy)
 - **[Skript Syntax](Skript-Syntax)** — every event, expression, effect, condition and type
 - **[Colors & Formatting](Colors-and-Formatting)** — hex and MiniMessage
-- **[Global Variables & Scripts](Global-Variables-and-Scripts)** — share state and scripts across the network
+- **[Global Variables & Scripts](Global-Variables-and-Scripts)** — share state and scripts across the network (SQLite or Redis)
+- **[PlaceholderAPI](Placeholders)** — `%bungeesk_...%` placeholders
 - **[Building from Source](Building-from-Source)**
 - **[Troubleshooting](Troubleshooting)**
 

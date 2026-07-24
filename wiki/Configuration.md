@@ -20,9 +20,16 @@ files:
   sync-at-connect: true   # push global scripts to a game server when it connects
   auto-update: true       # re-push a global script whenever it changes
   auto-delete: true       # delete a global script network-wide when removed
+redis:                    # optional — store global variables in Redis instead of SQLite
+  enabled: false          # off = built-in SQLite file (default)
+  host: "127.0.0.1"
+  port: 6379
+  password: ""            # empty = no auth
 ```
 
 A random `password` is generated on first run — copy it into every game server's config.
+
+> **Redis (optional):** set `redis.enabled: true` to store [global variables](Global-Variables-and-Scripts) in Redis instead of the local SQLite file — useful if several proxies should share them. SQLite is the default and needs no setup. Global *scripts* remain file-based either way.
 
 ## Game-server `config.yml`
 
