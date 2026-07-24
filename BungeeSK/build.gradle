@@ -39,7 +39,9 @@ dependencies {
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 shadowJar {
-    archiveFileName = "BungeeSK.jar"
+    // Internal build intermediate (fused into the published BungeeSK.jar by root :universalJar);
+    // named distinctly so it doesn't collide with the universal jar's "BungeeSK.jar".
+    archiveFileName = "BungeeSK-Paper-Bungee.jar"
 
     // Drop native libs / tooling resources for platforms we don't ship for (see root build.gradle).
     rootProject.ext.prunedJarPaths.each { exclude it }

@@ -51,11 +51,11 @@ allprojects {
     }
 }
 
-// The root project is a pure parent/aggregator. The per-platform jars are produced by the
-// subprojects' shadowJar tasks:
-//   :BungeeSK:shadowJar   -> BungeeSK/build/libs/BungeeSK.jar          (game servers + BungeeCord)
-//   :VelocitySK:shadowJar -> VelocitySK/build/libs/BungeeSK-Velocity.jar (Velocity proxy)
-// and :universalJar (below) fuses them into ONE jar that runs on all three platforms.
+// The root project is a pure parent/aggregator. The distributable jar is BungeeSK.jar, produced by
+// :universalJar (below) — one jar that runs on Paper/Spigot, BungeeCord and Velocity. It is FUSED
+// from two internal, per-platform shadowJars that are build intermediates (not published):
+//   :BungeeSK:shadowJar   -> BungeeSK/build/libs/BungeeSK-Paper-Bungee.jar  (game servers + BungeeCord)
+//   :VelocitySK:shadowJar -> VelocitySK/build/libs/BungeeSK-Velocity.jar    (Velocity proxy)
 
 // Builds a single "install anywhere" jar. Rather than re-shading everything (which would force a
 // single Adventure relocation that cannot satisfy both BungeeCord — needs the shaded copy — and
@@ -73,13 +73,13 @@ tasks.register("universalJar", Jar) {
     def velocityShadow = project(":VelocitySK").tasks.named("shadowJar")
     dependsOn bungeeShadow, velocityShadow
 
-    archiveFileName = "BungeeSK-Universal.jar"
+    // This IS the distributable jar — plain "BungeeSK.jar", runs everywhere.
+    archiveFileName = "BungeeSK.jar"
     destinationDirectory = layout.buildDirectory.dir("libs")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    // Base layer: the proven BungeeSK.jar (Paper + BungeeCord code, Adventure relocated to
-    // fr.zorg.shaded.kyori, plugin.yml + bungee.yml, and every shared library). Drop its manifest so
-    // this Jar task writes a fresh one.
+    // Base layer: the proven Paper + BungeeCord jar (Adventure relocated to fr.zorg.shaded.kyori,
+    // plugin.yml + bungee.yml, and every shared library). Drop its manifest so this task writes a fresh one.
     from(bungeeShadow.map { zipTree(it.archiveFile) }) {
         exclude "META-INF/MANIFEST.MF"
     }

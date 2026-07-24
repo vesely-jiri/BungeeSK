@@ -39,29 +39,14 @@ jobs:
       - name: Build all jars
         run: ./gradlew buildAll --stacktrace
 
-      # Three separate artifacts so the run page offers one download per jar (each downloads as its
-      # own zip — GitHub always zips artifact downloads; raw jars come from the Release job below).
-      - name: Upload universal jar
-        uses: actions/upload-artifact@v7
-        with:
-          name: BungeeSK-Universal
-          path: build/libs/BungeeSK-Universal.jar
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload game-server + BungeeCord jar
+      # Only the universal jar (build/libs/BungeeSK.jar) is published; the per-platform jars are
+      # internal build intermediates that :universalJar fuses together. (Artifact downloads are always
+      # zipped by GitHub; the raw jar is attached to the Release below.)
+      - name: Upload jar
         uses: actions/upload-artifact@v7
         with:
           name: BungeeSK
-          path: BungeeSK/build/libs/BungeeSK.jar
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload Velocity jar
-        uses: actions/upload-artifact@v7
-        with:
-          name: BungeeSK-Velocity
-          path: VelocitySK/build/libs/BungeeSK-Velocity.jar
+          path: build/libs/BungeeSK.jar
           if-no-files-found: error
           retention-days: 30
 
@@ -75,11 +60,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download built jars
+      - name: Download the jar
         uses: actions/download-artifact@v8
         with:
-          pattern: BungeeSK*
-          merge-multiple: true
+          name: BungeeSK
           path: dist
 
       - name: Publish release
@@ -87,7 +71,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >-
           gh release create "${{ github.ref_name }}"
-          dist/*.jar
+          dist/BungeeSK.jar
           --repo "${{ github.repository }}"
           --title "${{ github.ref_name }}"
           --generate-notes
