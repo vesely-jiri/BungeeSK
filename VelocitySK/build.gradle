@@ -16,6 +16,11 @@ dependencies {
     implementation group: "com.github.Carleslc.Simple-YAML", name: "Simple-Yaml", version: "1.8.4"
     implementation group: "io.methvin", name: "directory-watcher", version: "0.15.1"
     implementation group: "org.bstats", name: "bstats-velocity", version: "3.1.0"
+    // Optional Redis backend for global variables (slf4j/gson provided by the proxy).
+    implementation(group: "redis.clients", name: "jedis", version: "5.1.5") {
+        exclude group: "org.slf4j"
+        exclude group: "com.google.code.gson"
+    }
     compileOnly group: "com.velocitypowered", name: "velocity-api", version: "3.4.0-SNAPSHOT"
     annotationProcessor group: "com.velocitypowered", name: "velocity-api", version: "3.4.0-SNAPSHOT"
 }
@@ -38,8 +43,15 @@ shadowJar {
     // thing referencing it here is the never-loaded bungee code, so it's safe to drop.
     exclude "net/kyori/**"
 
+    // Relocate the Redis client + its pool (same target as the BungeeSK module, so the fused
+    // universal jar has a single, consistent copy).
+    relocate "redis.clients", "fr.zorg.shaded.jedis"
+    relocate "org.apache.commons.pool2", "fr.zorg.shaded.pool2"
+
     minimize {
         exclude dependency("org.xerial:sqlite-jdbc:.*")
         exclude project(":BungeeSK")
+        exclude dependency("redis.clients:jedis:.*")
+        exclude dependency("org.apache.commons:commons-pool2:.*")
     }
 }

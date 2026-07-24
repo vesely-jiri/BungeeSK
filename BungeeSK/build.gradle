@@ -25,6 +25,11 @@ dependencies {
     implementation group: "com.github.Carleslc.Simple-YAML", name: "Simple-Yaml", version: "1.8.4"
     implementation group: "io.methvin", name: "directory-watcher", version: "0.15.1"
     implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.47.1.0"
+    // Optional Redis backend for global variables (proxy-side). slf4j/gson are provided by the proxy.
+    implementation(group: "redis.clients", name: "jedis", version: "5.1.5") {
+        exclude group: "org.slf4j"
+        exclude group: "com.google.code.gson"
+    }
 
     // MiniMessage rendering for the BungeeCord side. Relocated (see shadowJar) so the shaded copy
     // can't clash with the Adventure that Paper already provides on the game-server side. Velocity
@@ -50,6 +55,9 @@ shadowJar {
 
     // Keep the shaded Adventure away from Paper's own net.kyori classes.
     relocate "net.kyori", "fr.zorg.shaded.kyori"
+    // Relocate the Redis client + its pool so they can't clash with another plugin's copy.
+    relocate "redis.clients", "fr.zorg.shaded.jedis"
+    relocate "org.apache.commons.pool2", "fr.zorg.shaded.pool2"
     // Adventure resolves MiniMessage / serializer implementations via ServiceLoader; this relocates
     // the META-INF/services provider files to match the shaded package (otherwise the providers are
     // not found at runtime and MiniMessage silently fails).
@@ -59,5 +67,8 @@ shadowJar {
         exclude dependency("org.xerial:sqlite-jdbc:.*")
         // MiniMessage resolves tags via reflection/services; don't let minimize strip it.
         exclude dependency("net.kyori:.*")
+        // Jedis + its pool use reflection internally; keep them whole.
+        exclude dependency("redis.clients:jedis:.*")
+        exclude dependency("org.apache.commons:commons-pool2:.*")
     }
 }

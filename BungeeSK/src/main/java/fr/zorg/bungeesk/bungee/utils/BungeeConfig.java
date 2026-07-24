@@ -22,7 +22,12 @@ public enum BungeeConfig {
     FILES$AUTO_DELETE(true, "On deletion of a global script, it will be deleted all across the network"),
     WHITELIST_IP$ENABLE(false, "If enabled and if the client doesn't match any IP below, it will be disconnected"),
     WHITELIST_IP$WHITELIST(new String[]{"127.0.0.1"}, "List of all whitelisted IPs"),
-    MESSAGES(false, "If enabled, a message will be sent when a client connects/disconnects from the server");
+    MESSAGES(false, "If enabled, a message will be sent when a client connects/disconnects from the server"),
+    REDIS$ENABLED(false, "Store global variables in Redis instead of the built-in SQLite file.",
+            "Useful to share global variables across multiple proxies. Leave false to keep local SQLite storage."),
+    REDIS$HOST("127.0.0.1", "Redis host (used only when redis.enabled is true)."),
+    REDIS$PORT(6379, "Redis port."),
+    REDIS$PASSWORD("", "Redis password, or empty for no authentication.");
 
     private Object value;
     private final String[] comments;
