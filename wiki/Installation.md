@@ -5,27 +5,18 @@
 - **Game servers:** Paper/Spigot **1.21.11** on **Java 21**, with [Skript](https://github.com/SkriptLang/Skript/releases/latest) **2.16+** installed.
 - **Proxy:** **BungeeCord** (1.21) **or** **Velocity** (3.4+). The proxy does **not** need Skript.
 
-## Option A — the universal jar (simplest)
+## One jar, everywhere
 
-`BungeeSK-Universal.jar` runs on **all three** platforms. Drop the **same file** into `plugins/` everywhere:
+There is a single download — **`BungeeSK.jar`** — and it runs on **all three** platforms. Drop the **same file** into `plugins/` on every server:
 
 | Server | Put it in |
 |--------|-----------|
 | Each Paper/Spigot game server | `plugins/` |
 | Your BungeeCord **or** Velocity proxy | `plugins/` |
 
-That's it — one jar to keep in sync.
+That's it — nothing platform-specific to pick, one jar to keep in sync.
 
-## Option B — per-platform jars
-
-If you prefer separate jars:
-
-| Jar | Goes on |
-|-----|---------|
-| `BungeeSK.jar` | Every game server **and** a BungeeCord proxy |
-| `BungeeSK-Velocity.jar` | A Velocity proxy |
-
-So a Velocity network uses `BungeeSK.jar` on the game servers and `BungeeSK-Velocity.jar` on the proxy; a BungeeCord network uses `BungeeSK.jar` on both.
+> Building from source also produces two internal per-platform jars (`BungeeSK-Paper-Bungee.jar`, `BungeeSK-Velocity.jar`); those are build intermediates that get fused into `BungeeSK.jar` and are not something you install.
 
 ## After installing
 

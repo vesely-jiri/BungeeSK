@@ -23,14 +23,13 @@
 
 ## 📥 Downloads
 
-Two jars are produced:
+One jar does it all:
 
-| Jar                     | Where it goes                                                       |
-|-------------------------|---------------------------------------------------------------------|
-| `BungeeSK.jar`          | Every **game server** (`plugins/`) **and** your **BungeeCord** proxy (`plugins/`). One jar, both roles. |
-| `BungeeSK-Velocity.jar` | Your **Velocity** proxy (`plugins/`).                               |
+| Jar            | Where it goes                                                                 |
+|----------------|-------------------------------------------------------------------------------|
+| `BungeeSK.jar` | Every **game server** and your **proxy** (BungeeCord **or** Velocity) — drop the same file into `plugins/` everywhere. |
 
-Grab them from the [latest release](https://github.com/ZorgBtw/BungeeSK/releases/latest), or [build from source](#-building-from-source). Make sure [Skript](https://github.com/SkriptLang/Skript/releases/latest) is installed on every game server.
+Grab it from the [latest release](https://github.com/ZorgBtw/BungeeSK/releases/latest), or [build from source](#-building-from-source). Make sure [Skript](https://github.com/SkriptLang/Skript/releases/latest) is installed on every game server.
 
 ## 🚀 Getting connected
 
@@ -127,16 +126,17 @@ See the full documentation on [SkriptHub](https://skripthub.net/docs/?addon=Bung
 Requires **JDK 21**. From the repo root:
 
 ```bash
-./gradlew :BungeeSK:shadowJar :VelocitySK:shadowJar
+./gradlew buildAll
 ```
 
-Outputs:
-- `BungeeSK/build/libs/BungeeSK.jar`
-- `VelocitySK/build/libs/BungeeSK-Velocity.jar`
+Output — the single distributable jar:
+- `build/libs/BungeeSK.jar` (runs on Paper/Spigot, BungeeCord **and** Velocity)
+
+It is fused from two internal, per-platform jars (`BungeeSK/build/libs/BungeeSK-Paper-Bungee.jar` and `VelocitySK/build/libs/BungeeSK-Velocity.jar`) that are build intermediates, not something you install.
 
 > **Windows + OneDrive:** if the project lives inside a OneDrive-synced folder, the sync client can lock `build/` and break Gradle. Redirect build output out of the synced folder:
 > ```bash
-> ./gradlew :BungeeSK:shadowJar :VelocitySK:shadowJar -PbuildDirBase=C:/Users/you/AppData/Local/bungeesk-build
+> ./gradlew buildAll -PbuildDirBase=C:/Users/you/AppData/Local/bungeesk-build
 > ```
 
 ## 📚 Support

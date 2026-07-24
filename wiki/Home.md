@@ -37,4 +37,4 @@ command /hub:
 | Game servers | Paper / Spigot **1.21.11** (Java 21) with Skript **2.16+** |
 | Proxy | **BungeeCord** (1.21) **or** Velocity (3.4+) |
 
-> One download does it all: `BungeeSK-Universal.jar` runs on Paper/Spigot, BungeeCord **and** Velocity. See [Installation](Installation).
+> One download does it all: a single `BungeeSK.jar` runs on Paper/Spigot, BungeeCord **and** Velocity. See [Installation](Installation).

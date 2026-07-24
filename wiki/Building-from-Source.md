@@ -11,15 +11,18 @@
 ./gradlew buildAll
 ```
 
-This produces **three** jars:
+The distributable jar is:
 
 | Jar | Path | Runs on |
 |-----|------|---------|
-| `BungeeSK-Universal.jar` | `build/libs/` | Paper/Spigot + BungeeCord + Velocity |
-| `BungeeSK.jar` | `BungeeSK/build/libs/` | game servers + BungeeCord |
-| `BungeeSK-Velocity.jar` | `VelocitySK/build/libs/` | Velocity |
+| **`BungeeSK.jar`** | `build/libs/` | Paper/Spigot + BungeeCord + Velocity |
 
-To build a single one, run e.g. `./gradlew :BungeeSK:shadowJar` or `./gradlew :VelocitySK:shadowJar`.
+It is fused from two **internal** per-platform jars (build intermediates, not installed):
+
+| Internal jar | Path |
+|--------------|------|
+| `BungeeSK-Paper-Bungee.jar` | `BungeeSK/build/libs/` |
+| `BungeeSK-Velocity.jar` | `VelocitySK/build/libs/` |
 
 ## How the universal jar is built
 
