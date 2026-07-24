@@ -25,8 +25,12 @@ public class BungeeUtils {
     /** Matches the {@code &#rrggbb} short hex form. */
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
 
-    /** Detects a MiniMessage-style tag, e.g. {@code <red>} or {@code <#ff0000>} or {@code </bold>}. */
-    private static final Pattern MINIMESSAGE_TAG = Pattern.compile("<[^<>\\s][^<>]*>");
+    /**
+     * Detects a real MiniMessage tag, e.g. {@code <red>}, {@code <#ff0000>}, {@code <gradient:#a:#b>}
+     * or {@code </bold>}. The tag name must start with a letter or {@code '#'} and contain no
+     * whitespace, so literal text like {@code <IP:PORT / ALL>} is not treated as MiniMessage.
+     */
+    private static final Pattern MINIMESSAGE_TAG = Pattern.compile("</?[a-zA-Z#][^<>\\s]*>");
 
     public static ProxiedPlayer getPlayer(BungeePlayer bungeePlayer) {
         final ProxiedPlayer player = BungeeSK.getInstance().getProxy().getPlayer(bungeePlayer.getName());
@@ -73,7 +77,9 @@ public class BungeeUtils {
     public static BaseComponent[] getTextComponent(String text) {
         if (text == null || text.isEmpty())
             return TextComponent.fromLegacyText("");
-        if (MINIMESSAGE_TAG.matcher(text).find()) {
+        // Strings already carrying legacy section-sign codes are legacy, not MiniMessage (the strict
+        // MiniMessage parser rejects §), so skip straight to the legacy path.
+        if (text.indexOf('§') < 0 && MINIMESSAGE_TAG.matcher(text).find()) {
             try {
                 final Component component = MiniMessage.miniMessage().deserialize(text);
                 final String json = GsonComponentSerializer.gson().serialize(component);

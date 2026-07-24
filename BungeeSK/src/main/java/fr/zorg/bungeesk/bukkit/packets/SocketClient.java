@@ -24,24 +24,35 @@ public class SocketClient {
     private boolean encrypting;
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    public SocketClient(Socket socket) {
+    /**
+     * Opens the object streams over {@code socket}. This performs blocking handshake I/O (the
+     * {@link ObjectInputStream} constructor reads the peer's stream header), so it may throw if the
+     * proxy drops the connection mid-handshake — the caller is expected to catch that and reconnect.
+     * The read loop is NOT started here; call {@link #startReading()} once this client has been
+     * published to {@link PacketClient} so a fast failure can't notify a not-yet-assigned client.
+     */
+    public SocketClient(Socket socket) throws IOException {
         this.socket = socket;
         this.encrypting = false;
-        try {
-            // The output stream must be created (and its header flushed) before the input stream,
-            // otherwise both peers block in the ObjectInputStream constructor. The input stream is
-            // wrapped with a deserialization whitelist (see SafeSerialization) because the first
-            // reads happen before authentication.
-            this.writer = new ObjectOutputStream(socket.getOutputStream());
-            this.writer.flush();
-            this.reader = SafeSerialization.createFilteredStream(socket.getInputStream());
-            this.readThread = new Thread(this::read, "BungeeSK-SocketReader");
-            this.readThread.setDaemon(true);
-            this.readThread.start();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            this.disconnect();
-        }
+        // The output stream must be created (and its header flushed) before the input stream,
+        // otherwise both peers block in the ObjectInputStream constructor. The input stream is
+        // wrapped with a deserialization whitelist (see SafeSerialization) because the first
+        // reads happen before authentication.
+        this.writer = new ObjectOutputStream(socket.getOutputStream());
+        this.writer.flush();
+        this.reader = SafeSerialization.createFilteredStream(socket.getInputStream());
+        this.readThread = new Thread(this::read, "BungeeSK-SocketReader");
+        this.readThread.setDaemon(true);
+    }
+
+    /**
+     * Starts the background read loop. Must be called exactly once, after this client is assigned to
+     * {@link PacketClient#getClient()} — otherwise a read failure could call
+     * {@link PacketClient#notifyDisconnected(SocketClient)} before the assignment and be ignored,
+     * stalling auto-reconnect.
+     */
+    public void startReading() {
+        this.readThread.start();
     }
 
     public void read() {

@@ -76,7 +76,7 @@ public class PacketClient {
             return;
         }
         BungeeSK.runAsync(() -> {
-            Socket newSocket = null;
+            final Socket newSocket;
             try {
                 newSocket = new Socket();
                 newSocket.connect(new InetSocketAddress(current.getAddress(), current.getPort()), CONNECT_TIMEOUT_MS);
@@ -87,14 +87,33 @@ public class PacketClient {
                 handleDrop();
                 return;
             }
+
+            // Perform the (blocking) handshake stream setup OUTSIDE the class lock. If the proxy
+            // resets the connection mid-handshake this throws instead of dumping a raw stack trace,
+            // and we schedule the next reconnect attempt (previously this path stalled the loop).
+            final SocketClient newClient;
+            try {
+                newClient = new SocketClient(newSocket);
+            } catch (IOException ex) {
+                closeQuietly(newSocket);
+                BungeeSK.getInstance().getLogger().warning("BungeeSK lost the connection to the proxy at "
+                        + current.getAddress() + ":" + current.getPort()
+                        + " during the handshake (will retry).");
+                handleDrop();
+                return;
+            }
+
             synchronized (PacketClient.class) {
                 if (!autoReconnect) {
                     // A stop()/start() happened while we were connecting; drop this socket.
-                    closeQuietly(newSocket);
+                    newClient.disconnect();
                     return;
                 }
                 socket = newSocket;
-                client = new SocketClient(newSocket);
+                client = newClient;
+                // Start reads only now that this client is published, so a fast read failure's
+                // notifyDisconnected(this) matches and correctly schedules a reconnect.
+                newClient.startReading();
             }
         });
     }

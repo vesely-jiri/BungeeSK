@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class VelocityUtils {
 
@@ -30,6 +31,17 @@ public class VelocityUtils {
             .hexColors()
             .useUnusualXRepeatedCharacterHexFormat()
             .build();
+
+    /**
+     * Detects a real MiniMessage tag such as {@code <red>}, {@code <#ff0000>},
+     * {@code <gradient:#00ffcc:#0066ff>} or {@code </bold>}. The tag name must start with a letter
+     * or {@code '#'} and contain no whitespace, so literal help text like {@code <IP:PORT / ALL>}
+     * is NOT mistaken for MiniMessage (which previously routed it to the strict parser and crashed).
+     */
+    private static final Pattern MINIMESSAGE_TAG = Pattern.compile("</?[a-zA-Z#][^<>\\s]*>");
+
+    /** The legacy section sign; strings already containing it are treated as legacy, never MiniMessage. */
+    private static final char SECTION = '§';
 
     /**
      * Converts a raw format string into an Adventure {@link Component} following this precedence:
@@ -49,8 +61,15 @@ public class VelocityUtils {
     public static Component format(String text) {
         if (text == null || text.isEmpty())
             return Component.empty();
-        if (hasMiniMessageTag(text))
-            return MiniMessage.miniMessage().deserialize(text);
+        if (hasMiniMessageTag(text)) {
+            try {
+                return MiniMessage.miniMessage().deserialize(text);
+            } catch (RuntimeException ex) {
+                // Malformed (or legacy-tainted) MiniMessage — fall back to legacy so we never fail
+                // to send a message, mirroring the BungeeCord path.
+                BungeeSK.getLogger().warn("Could not render MiniMessage \"{}\": {} — using legacy formatting instead.", text, ex.toString());
+            }
+        }
         return LEGACY.deserialize(text);
     }
 
@@ -68,12 +87,14 @@ public class VelocityUtils {
     }
 
     /**
-     * Heuristic: does this string look like it contains a MiniMessage tag, i.e. a {@code '<'}
-     * followed somewhere later by a {@code '>'}.
+     * Whether this string should be parsed as MiniMessage. It must contain a real MiniMessage tag
+     * (see {@link #MINIMESSAGE_TAG}) and must NOT already contain legacy section-sign codes — the
+     * MiniMessage parser is strict and throws on legacy {@code §} codes, so those go to legacy.
      */
     private static boolean hasMiniMessageTag(String text) {
-        final int open = text.indexOf('<');
-        return open >= 0 && text.indexOf('>', open + 1) > open;
+        if (text.indexOf(SECTION) >= 0)
+            return false;
+        return MINIMESSAGE_TAG.matcher(text).find();
     }
 
     public static Player getPlayer(BungeePlayer bungeePlayer) {
