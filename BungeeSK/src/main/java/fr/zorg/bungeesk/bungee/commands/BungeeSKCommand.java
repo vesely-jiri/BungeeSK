@@ -22,7 +22,10 @@ public class BungeeSKCommand extends Command implements Listener {
     public static final String PREFIX = "§6BungeeSK §7» ";
 
     public BungeeSKCommand() {
-        super("bungeesk");
+        // Named "bungeeskproxy" (alias "bsproxy") so it does not collide with the game-server-side
+        // "/bungeesk" command: on a proxy network the proxy would otherwise intercept "/bungeesk"
+        // and shadow the backend command (which would then only be reachable as "/bungeesk:bungeesk").
+        super("bungeeskproxy", null, "bsproxy");
     }
 
     @Override
@@ -34,10 +37,10 @@ public class BungeeSKCommand extends Command implements Listener {
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§bHelp"));
-            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §3servers§e: §7Displays all servers connected to BungeeSK"));
-            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
-            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
-            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §dreload§e: §7Reload config.yml and restart the connection listener"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §3servers§e: §7Displays all servers connected to BungeeSK"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §dreload§e: §7Reload config.yml and restart the connection listener"));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));
@@ -58,7 +61,7 @@ public class BungeeSKCommand extends Command implements Listener {
                     final TextComponent component = new TextComponent(message);
                     final TextComponent disconnectServerComponent = new TextComponent(" §c[✖]");
                     disconnectServerComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, BungeeUtils.getTextComponent("§cDisconnect this server")));
-                    disconnectServerComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bungeesk disconnect " + socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
+                    disconnectServerComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bungeeskproxy disconnect " + socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
                     component.addExtra(disconnectServerComponent);
                     sender.sendMessage(component);
                 } else
@@ -126,10 +129,9 @@ public class BungeeSKCommand extends Command implements Listener {
 
     @EventHandler
     public void onTabComplete(TabCompleteEvent e) {
-        if (!((CommandSender) e.getSender()).hasPermission("bungeesk.command") &&
-                e.getSuggestions().stream().anyMatch(s -> s.equalsIgnoreCase("bungeesk"))) {
-            e.getSuggestions().remove("bungeesk");
-        }
+        if (((CommandSender) e.getSender()).hasPermission("bungeesk.command"))
+            return;
+        e.getSuggestions().removeIf(s -> s.equalsIgnoreCase("bungeeskproxy") || s.equalsIgnoreCase("bsproxy"));
     }
 
 }

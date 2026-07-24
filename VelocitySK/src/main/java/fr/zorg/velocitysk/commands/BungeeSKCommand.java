@@ -31,10 +31,10 @@ public class BungeeSKCommand implements SimpleCommand {
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§bHelp"));
-            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §3servers§e: §7Displays all servers connected to BungeeSK"));
-            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
-            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
-            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §dreload§e: §7Reload config.yml and restart the connection listener"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §3servers§e: §7Displays all servers connected to BungeeSK"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §dreload§e: §7Reload config.yml and restart the connection listener"));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));
@@ -55,7 +55,7 @@ public class BungeeSKCommand implements SimpleCommand {
                     final Component component = Component.text(message);
                     final Component disconnectServerComponent = Component.text(" §c[✖]")
                             .hoverEvent(HoverEvent.showText(Component.text("§cDisconnect this server")))
-                            .clickEvent(ClickEvent.runCommand("/bungeesk disconnect " + socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
+                            .clickEvent(ClickEvent.runCommand("/bungeeskproxy disconnect " + socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
                     component.append(disconnectServerComponent);
                     sender.sendMessage(component);
                 } else
