@@ -44,16 +44,14 @@ public class GlobalVariables {
 
     public static Pair<byte[], String> getGlobalVariable(String variableName) {
         checkConnection();
-        try {
-            final Statement statement = connection.createStatement();
-            final ResultSet resultSet = statement.executeQuery("SELECT * FROM global_variables WHERE name = '" + variableName + "';");
-            if (resultSet.next()) {
-                final String base64value = resultSet.getString("value");
-                final byte[] value = Base64.getDecoder().decode(base64value);
-                final String type = resultSet.getString("type");
-                resultSet.close();
-                statement.close();
-                return Pair.from(value, type);
+        try (final PreparedStatement statement = connection.prepareStatement("SELECT value, type FROM global_variables WHERE name = ?;")) {
+            statement.setString(1, variableName);
+            try (final ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    final byte[] value = Base64.getDecoder().decode(resultSet.getString("value"));
+                    final String type = resultSet.getString("type");
+                    return Pair.from(value, type);
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -64,10 +62,11 @@ public class GlobalVariables {
     public static void setGlobalVariable(String name, byte[] value, String type) {
         checkConnection();
         final String base64Value = Base64.getEncoder().encodeToString(value);
-        try {
-            final Statement statement = connection.createStatement();
-            statement.execute("INSERT OR REPLACE INTO global_variables VALUES ('" + name + "', '" + base64Value + "', '" + type + "');");
-            statement.close();
+        try (final PreparedStatement statement = connection.prepareStatement("INSERT OR REPLACE INTO global_variables VALUES (?, ?, ?);")) {
+            statement.setString(1, name);
+            statement.setString(2, base64Value);
+            statement.setString(3, type);
+            statement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -75,10 +74,9 @@ public class GlobalVariables {
 
     public static void deleteGlobalVariable(String name) {
         checkConnection();
-        try {
-            final Statement statement = connection.createStatement();
-            statement.execute("DELETE FROM global_variables WHERE name = '" + name + "';");
-            statement.close();
+        try (final PreparedStatement statement = connection.prepareStatement("DELETE FROM global_variables WHERE name = ?;")) {
+            statement.setString(1, name);
+            statement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
