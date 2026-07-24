@@ -25,7 +25,10 @@ dependencies {
 shadowJar {
     archiveFileName = "BungeeSK-Velocity.jar"
 
-    relocate "org.bstats", "fr.zorg"
+    // Relocate bStats UNDER the velocitysk package so every Velocity-only class lives beneath
+    // fr/zorg/velocitysk/**. This lets the universal jar (see the root :universalJar task) pull the
+    // whole Velocity slice with a single include filter, without dragging in anything else.
+    relocate "org.bstats", "fr.zorg.velocitysk.libs.bstats"
 
     // Adventure (net.kyori) reaches here transitively from :BungeeSK (where it's shaded for the
     // BungeeCord side), but Velocity provides Adventure natively — bundling it would clash. The only

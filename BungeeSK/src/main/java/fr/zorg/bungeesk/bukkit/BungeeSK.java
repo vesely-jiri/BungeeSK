@@ -3,11 +3,16 @@ package fr.zorg.bungeesk.bukkit;
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
 import fr.zorg.bungeesk.bukkit.api.BukkitAPI;
+import fr.zorg.bungeesk.bukkit.commands.BungeeSKCommand;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.bukkit.utils.BungeeSKConfig;
 import fr.zorg.bungeesk.bukkit.utils.ClientBuilder;
 import fr.zorg.bungeesk.bukkit.utils.Metrics;
 import fr.zorg.bungeesk.common.AutoUpdater;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +29,7 @@ public class BungeeSK extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        final long startTime = System.currentTimeMillis();
         executor = Executors.newCachedThreadPool(runnable -> {
             final Thread thread = new Thread(runnable, "BungeeSK-Async");
             thread.setDaemon(true);
@@ -45,7 +51,48 @@ public class BungeeSK extends JavaPlugin implements Listener {
 
         this.metrics.addCustomChart(new Metrics.SimplePie("skript_version", () -> Skript.getVersion().toString()));
 
+        final PluginCommand command = this.getCommand("bungeesk");
+        if (command != null) {
+            final BungeeSKCommand executor = new BungeeSKCommand();
+            command.setExecutor(executor);
+            command.setTabCompleter(executor);
+        }
+
         this.setupConnection();
+
+        this.logStartupBanner(System.currentTimeMillis() - startTime);
+    }
+
+    /**
+     * Re-reads {@code config.yml}, re-applies reconnect settings and (if auto-connect is on)
+     * re-establishes the connection. Backs the {@code /bungeesk reload} command.
+     */
+    public void reload() {
+        this.setupConnection();
+    }
+
+    /**
+     * Prints a small structured, coloured startup summary to the console (rendered by Paper's
+     * console). Shows platform, Skript version, the configured proxy target, reconnect state and how
+     * long enabling took.
+     */
+    private void logStartupBanner(long ms) {
+        final boolean autoConnect = BungeeSKConfig.CONNECTION$AUTO_CONNECT.getBoolean();
+        final String target = BungeeSKConfig.CONNECTION$ADDRESS.getString() + ":" + BungeeSKConfig.CONNECTION$PORT.getInt();
+        final ConsoleCommandSender console = Bukkit.getConsoleSender();
+        final String line = "&8&m                                                        ";
+        console.sendMessage(color(line));
+        console.sendMessage(color(" &6&lBungeeSK &7v" + this.getDescription().getVersion() + " &8• &7game-server side"));
+        console.sendMessage(color(" &8» &7Server:    &f" + Bukkit.getName() + " " + Bukkit.getBukkitVersion()));
+        console.sendMessage(color(" &8» &7Skript:    &f" + Skript.getVersion()));
+        console.sendMessage(color(" &8» &7Proxy:     &f" + target + (autoConnect ? " &8(&aauto-connect&8)" : " &8(&7manual&8)")));
+        console.sendMessage(color(" &8» &7Reconnect: " + (BungeeSKConfig.RECONNECT$ENABLED.getBoolean() ? "&aenabled" : "&cdisabled")));
+        console.sendMessage(color(" &8» &aEnabled in &f" + ms + "ms"));
+        console.sendMessage(color(line));
+    }
+
+    private static String color(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
     }
 
     @Override

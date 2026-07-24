@@ -5,3 +5,12 @@ website: https://github.com/ZorgBtw/BungeeSK
 version: 2.1.0
 api-version: 1.21
 softdepend: [ Skript ]
+commands:
+  bungeesk:
+    description: BungeeSK admin command (status, reconnect, disconnect, reload).
+    usage: /bungeesk help
+    permission: bungeesk.command
+permissions:
+  bungeesk.command:
+    description: Allows use of the /bungeesk admin command.
+    default: op

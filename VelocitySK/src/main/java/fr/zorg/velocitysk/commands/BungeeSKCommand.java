@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.velocitysk.packets.PacketServer;
 import fr.zorg.velocitysk.packets.SocketServer;
+import fr.zorg.velocitysk.utils.BungeeConfig;
 import fr.zorg.velocitysk.utils.VelocityUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -33,6 +34,7 @@ public class BungeeSKCommand implements SimpleCommand {
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §3servers§e: §7Displays all servers connected to BungeeSK"));
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeesk §dreload§e: §7Reload config.yml and restart the connection listener"));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));
@@ -108,6 +110,12 @@ public class BungeeSKCommand implements SimpleCommand {
             PacketServer.stop();
             PacketServer.start();
             sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§aBungeeSK has been restarted successfully !"));
+        } else if (args[0].equalsIgnoreCase("reload")) {
+            BungeeConfig.init();
+            if (PacketServer.getServerSocket() != null && !PacketServer.getServerSocket().isClosed())
+                PacketServer.stop();
+            PacketServer.start();
+            sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§aReloaded config.yml and restarted BungeeSK on port §f" + BungeeConfig.PORT.get() + "§a."));
         } else {
             sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§cUnknown command !"));
         }

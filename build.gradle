@@ -1,3 +1,6 @@
+// 'base' gives the root project the Jar task type + archive conventions used by :universalJar below.
+apply plugin: "base"
+
 allprojects {
     group = "fr.zorg"
     version = "2.1.0"
@@ -19,12 +22,51 @@ allprojects {
     }
 }
 
-// The root project is a pure parent/aggregator. The distributable jars are produced by the
+// The root project is a pure parent/aggregator. The per-platform jars are produced by the
 // subprojects' shadowJar tasks:
 //   :BungeeSK:shadowJar   -> BungeeSK/build/libs/BungeeSK.jar          (game servers + BungeeCord)
 //   :VelocitySK:shadowJar -> VelocitySK/build/libs/BungeeSK-Velocity.jar (Velocity proxy)
+// and :universalJar (below) fuses them into ONE jar that runs on all three platforms.
+
+// Builds a single "install anywhere" jar. Rather than re-shading everything (which would force a
+// single Adventure relocation that cannot satisfy both BungeeCord — needs the shaded copy — and
+// Velocity — needs the platform copy — at once), it FUSES the two already-shaded, runtime-proven
+// jars: the BungeeSK base jar (whose bytecode already targets the relocated fr.zorg.shaded.kyori)
+// plus only the Velocity slice (whose bytecode targets the platform net.kyori). Because each side's
+// references are baked in before fusing, no relocation runs here and both stay correct. The three
+// plugin descriptors (plugin.yml / bungee.yml / velocity-plugin.json) coexist; each platform reads
+// only its own and loads only its own main class, so the other platforms' classes sit inert.
+tasks.register("universalJar", Jar) {
+    group = "build"
+    description = "Builds one universal jar that runs on Paper/Spigot, BungeeCord and Velocity."
+
+    def bungeeShadow = project(":BungeeSK").tasks.named("shadowJar")
+    def velocityShadow = project(":VelocitySK").tasks.named("shadowJar")
+    dependsOn bungeeShadow, velocityShadow
+
+    archiveFileName = "BungeeSK-Universal.jar"
+    destinationDirectory = layout.buildDirectory.dir("libs")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Base layer: the proven BungeeSK.jar (Paper + BungeeCord code, Adventure relocated to
+    // fr.zorg.shaded.kyori, plugin.yml + bungee.yml, and every shared library). Drop its manifest so
+    // this Jar task writes a fresh one.
+    from(bungeeShadow.map { zipTree(it.archiveFile) }) {
+        exclude "META-INF/MANIFEST.MF"
+    }
+    // Overlay layer: ONLY the Velocity-specific classes (fr.zorg.velocitysk.**, which now also holds
+    // the relocated bStats) and the Velocity plugin descriptor. Everything else Velocity needs is
+    // already in the base layer, and Velocity supplies its own Adventure — so nothing pulled here
+    // references an unbundled net.kyori. First-one-wins (EXCLUDE) keeps the base layer authoritative
+    // for the shared classes that also appear (inertly) inside the Velocity jar.
+    from(velocityShadow.map { zipTree(it.archiveFile) }) {
+        include "fr/zorg/velocitysk/**"
+        include "velocity-plugin.json"
+    }
+}
+
 tasks.register("buildAll") {
     group = "build"
-    description = "Builds both distributable jars (BungeeSK.jar + BungeeSK-Velocity.jar)."
-    dependsOn ":BungeeSK:shadowJar", ":VelocitySK:shadowJar"
+    description = "Builds the per-platform jars (BungeeSK.jar + BungeeSK-Velocity.jar) and the universal jar."
+    dependsOn ":BungeeSK:shadowJar", ":VelocitySK:shadowJar", "universalJar"
 }

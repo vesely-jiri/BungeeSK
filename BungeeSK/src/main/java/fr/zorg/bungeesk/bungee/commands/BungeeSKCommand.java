@@ -2,6 +2,7 @@ package fr.zorg.bungeesk.bungee.commands;
 
 import fr.zorg.bungeesk.bungee.packets.PacketServer;
 import fr.zorg.bungeesk.bungee.packets.SocketServer;
+import fr.zorg.bungeesk.bungee.utils.BungeeConfig;
 import fr.zorg.bungeesk.bungee.utils.BungeeUtils;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import net.md_5.bungee.api.CommandSender;
@@ -36,6 +37,7 @@ public class BungeeSKCommand extends Command implements Listener {
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §3servers§e: §7Displays all servers connected to BungeeSK"));
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeesk §dreload§e: §7Reload config.yml and restart the connection listener"));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));
@@ -111,6 +113,12 @@ public class BungeeSKCommand extends Command implements Listener {
             PacketServer.stop();
             PacketServer.start();
             sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§aBungeeSK has been restarted successfully !"));
+        } else if (args[0].equalsIgnoreCase("reload")) {
+            BungeeConfig.init();
+            if (PacketServer.getServerSocket() != null && !PacketServer.getServerSocket().isClosed())
+                PacketServer.stop();
+            PacketServer.start();
+            sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§aReloaded config.yml and restarted BungeeSK on port §f" + BungeeConfig.PORT.get() + "§a."));
         } else {
             sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§cUnknown command !"));
         }
