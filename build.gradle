@@ -39,6 +39,7 @@ allprojects {
         maven { url = "https://jitpack.io" }
         maven { url = "https://repo.papermc.io/repository/maven-public/" }
         maven { url = "https://repo.skriptlang.org/releases" }
+        maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
     }
 
     // Windows/OneDrive workaround: when the project sits inside a OneDrive-synced folder, the

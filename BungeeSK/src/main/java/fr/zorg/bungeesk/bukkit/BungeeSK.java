@@ -59,8 +59,22 @@ public class BungeeSK extends JavaPlugin implements Listener {
         }
 
         this.setupConnection();
+        this.setupPlaceholders();
 
         this.logStartupBanner(System.currentTimeMillis() - startTime);
+    }
+
+    /**
+     * Registers the PlaceholderAPI expansion and starts the async network-stats cache — but only when
+     * PlaceholderAPI is installed. Reflection-free: the expansion class is loaded lazily here, so a
+     * server without PlaceholderAPI never touches its (absent) classes.
+     */
+    private void setupPlaceholders() {
+        if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") == null)
+            return;
+        fr.zorg.bungeesk.bukkit.utils.NetworkStats.start();
+        new fr.zorg.bungeesk.bukkit.placeholders.BungeeSKExpansion().register();
+        this.getLogger().info("Hooked into PlaceholderAPI (%bungeesk_...%).");
     }
 
     /**
@@ -97,6 +111,7 @@ public class BungeeSK extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        fr.zorg.bungeesk.bukkit.utils.NetworkStats.stop();
         PacketClient.stop();
         if (executor != null)
             executor.shutdownNow();

@@ -13,6 +13,8 @@ dependencies {
     compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.11-R0.1-SNAPSHOT"
     compileOnly group: "net.md-5", name: "bungeecord-api", version: "1.21-R0.4"
     compileOnly group: "org.jetbrains", name: "annotations", version: "24.1.0"
+    // Optional PlaceholderAPI integration (soft-depend); the expansion registers only when PAPI is present.
+    compileOnly group: "me.clip", name: "placeholderapi", version: "2.11.6"
     compileOnly(group: "com.github.SkriptLang", name: "Skript", version: "2.16.0") {
         exclude group: "com.sk89q.worldguard", module: "worldguard-legacy"
         exclude group: "net.milkbowl.vault", module: "Vault"
