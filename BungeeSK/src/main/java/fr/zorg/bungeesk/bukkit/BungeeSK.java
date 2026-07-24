@@ -106,8 +106,10 @@ public class BungeeSK extends JavaPlugin implements Listener {
         BungeeSKConfig.init();
         PacketClient.configureReconnect(
                 BungeeSKConfig.RECONNECT$ENABLED.getBoolean(),
+                BungeeSKConfig.RECONNECT$DELAYS_SECONDS.getIntList(),
                 BungeeSKConfig.RECONNECT$INITIAL_DELAY_SECONDS.getInt(),
-                BungeeSKConfig.RECONNECT$MAX_DELAY_SECONDS.getInt());
+                BungeeSKConfig.RECONNECT$MAX_DELAY_SECONDS.getInt(),
+                BungeeSKConfig.RECONNECT$LOG_ATTEMPTS.getBoolean());
 
         if (!BungeeSKConfig.CONNECTION$AUTO_CONNECT.getBoolean())
             return;

@@ -5,6 +5,9 @@ import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * config.yml for the game-server (Bukkit) side of BungeeSK. Lets admins define the proxy connection
@@ -20,8 +23,17 @@ public enum BungeeSKConfig {
     CONNECTION$PORT(20000, "Port BungeeSK listens on, on the proxy. Must match the proxy's config.yml."),
     CONNECTION$PASSWORD("", "Connection password. Must be identical to the proxy's config.yml password."),
     RECONNECT$ENABLED(true, "Automatically try to reconnect if the connection to the proxy drops."),
-    RECONNECT$INITIAL_DELAY_SECONDS(5, "Delay before the first reconnect attempt."),
-    RECONNECT$MAX_DELAY_SECONDS(60, "Maximum delay between reconnect attempts (exponential backoff caps here)."),
+    RECONNECT$DELAYS_SECONDS(Arrays.asList(5, 10, 20, 30),
+            "Seconds to wait before each reconnect attempt. The list is stepped through one entry per",
+            "attempt and the LAST value repeats for every later attempt. Examples:",
+            "  [30]            -> always wait 30s (fixed)",
+            "  [5, 10, 20, 30] -> 5s, 10s, 20s, then 30s for every attempt after that",
+            "Leave empty ([]) to use exponential backoff between initial-delay-seconds and max-delay-seconds instead."),
+    RECONNECT$INITIAL_DELAY_SECONDS(5, "Exponential-backoff fallback: delay before the first attempt (only used when delays-seconds is empty)."),
+    RECONNECT$MAX_DELAY_SECONDS(60, "Exponential-backoff fallback: maximum delay between attempts (only used when delays-seconds is empty)."),
+    RECONNECT$LOG_ATTEMPTS(false,
+            "Log a line before every single reconnect attempt. Off by default: only a message when the",
+            "connection is lost and a message when it is re-established are shown."),
     DEBUG(false, "Log extra information about the connection to the console.");
 
     private Object value;
@@ -51,6 +63,28 @@ public enum BungeeSKConfig {
 
     public boolean getBoolean() {
         return this.value instanceof Boolean ? (Boolean) this.value : Boolean.parseBoolean(String.valueOf(this.value));
+    }
+
+    /**
+     * Reads this value as a list of ints (for {@code reconnect.delays-seconds}). Non-numeric or
+     * negative entries are skipped; a non-list value yields an empty list.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Integer> getIntList() {
+        final List<Integer> result = new ArrayList<>();
+        if (this.value instanceof List) {
+            for (final Object element : (List<Object>) this.value) {
+                if (element instanceof Number) {
+                    result.add(((Number) element).intValue());
+                } else {
+                    try {
+                        result.add(Integer.parseInt(String.valueOf(element).trim()));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public String getString() {
