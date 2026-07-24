@@ -39,21 +39,29 @@ jobs:
       - name: Build all jars
         run: ./gradlew buildAll --stacktrace
 
-      # Collect the three jars into one flat directory so the uploaded artifact (and thus the
-      # downloaded release assets) are flat, not nested under each module's build/libs path.
-      - name: Collect jars
-        run: |
-          mkdir -p staging
-          cp build/libs/BungeeSK-Universal.jar \
-             BungeeSK/build/libs/BungeeSK.jar \
-             VelocitySK/build/libs/BungeeSK-Velocity.jar \
-             staging/
-
-      - name: Upload jars
+      # Three separate artifacts so the run page offers one download per jar (each downloads as its
+      # own zip — GitHub always zips artifact downloads; raw jars come from the Release job below).
+      - name: Upload universal jar
         uses: actions/upload-artifact@v7
         with:
-          name: BungeeSK-jars
-          path: staging/
+          name: BungeeSK-Universal
+          path: build/libs/BungeeSK-Universal.jar
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload game-server + BungeeCord jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: BungeeSK
+          path: BungeeSK/build/libs/BungeeSK.jar
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Velocity jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: BungeeSK-Velocity
+          path: VelocitySK/build/libs/BungeeSK-Velocity.jar
           if-no-files-found: error
           retention-days: 30
 
@@ -70,7 +78,8 @@ jobs:
       - name: Download built jars
         uses: actions/download-artifact@v8
         with:
-          name: BungeeSK-jars
+          pattern: BungeeSK*
+          merge-multiple: true
           path: dist
 
       - name: Publish release
