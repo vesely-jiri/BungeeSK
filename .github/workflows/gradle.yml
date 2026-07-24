@@ -36,16 +36,24 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Build both distributable jars
+      - name: Build all jars
         run: ./gradlew buildAll --stacktrace
+
+      # Collect the three jars into one flat directory so the uploaded artifact (and thus the
+      # downloaded release assets) are flat, not nested under each module's build/libs path.
+      - name: Collect jars
+        run: |
+          mkdir -p staging
+          cp build/libs/BungeeSK-Universal.jar \
+             BungeeSK/build/libs/BungeeSK.jar \
+             VelocitySK/build/libs/BungeeSK-Velocity.jar \
+             staging/
 
       - name: Upload jars
         uses: actions/upload-artifact@v7
         with:
           name: BungeeSK-jars
-          path: |
-            BungeeSK/build/libs/BungeeSK.jar
-            VelocitySK/build/libs/BungeeSK-Velocity.jar
+          path: staging/
           if-no-files-found: error
           retention-days: 30
 
@@ -70,7 +78,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >-
           gh release create "${{ github.ref_name }}"
-          dist/BungeeSK.jar dist/BungeeSK-Velocity.jar
+          dist/*.jar
           --repo "${{ github.repository }}"
           --title "${{ github.ref_name }}"
           --generate-notes
