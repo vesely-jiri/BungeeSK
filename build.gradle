@@ -1,6 +1,35 @@
 // 'base' gives the root project the Jar task type + archive conventions used by :universalJar below.
 apply plugin: "base"
 
+// Jar-size trim, applied by both shadowJar tasks. sqlite-jdbc bundles one native library per OS/arch
+// (~0.5 MB each, ~13 MB total); we keep only the platforms a Minecraft server realistically runs on
+// — Linux (glibc + Alpine/musl) and Windows on x86_64/aarch64, plus Apple-Silicon Mac for local dev —
+// and drop the rest. Excluding a path that isn't present is a harmless no-op, and any future new arch
+// is simply kept (never broken). Groovy's tooling resources are dead weight (its classes are already
+// stripped by 'minimize', leaving only .html/.png/.properties junk).
+ext.prunedJarPaths = [
+        // sqlite native libraries for platforms we don't ship for
+        "org/sqlite/native/Linux-Android/**",
+        "org/sqlite/native/FreeBSD/**",
+        "org/sqlite/native/Mac/x86_64/**",
+        "org/sqlite/native/Linux/x86/**",
+        "org/sqlite/native/Linux/arm/**",
+        "org/sqlite/native/Linux/armv6/**",
+        "org/sqlite/native/Linux/armv7/**",
+        "org/sqlite/native/Linux/ppc64/**",
+        "org/sqlite/native/Linux/riscv64/**",
+        "org/sqlite/native/Linux/s390x/**",
+        "org/sqlite/native/Linux-Musl/x86/**",
+        "org/sqlite/native/Windows/x86/**",
+        "org/sqlite/native/Windows/armv7/**",
+        "org/sqlite/native/Windows/aarch64/**",
+        // unused Groovy tooling resources (classes already removed by 'minimize')
+        "groovy/**",
+        "org/codehaus/groovy/**",
+        "META-INF/services/org.codehaus.groovy.*",
+        "META-INF/groovy-release-info.properties",
+]
+
 allprojects {
     group = "fr.zorg"
     version = "2.1.0"

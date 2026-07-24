@@ -41,6 +41,9 @@ dependencies {
 shadowJar {
     archiveFileName = "BungeeSK.jar"
 
+    // Drop native libs / tooling resources for platforms we don't ship for (see root build.gradle).
+    rootProject.ext.prunedJarPaths.each { exclude it }
+
     // Keep the shaded Adventure away from Paper's own net.kyori classes.
     relocate "net.kyori", "fr.zorg.shaded.kyori"
     // Adventure resolves MiniMessage / serializer implementations via ServiceLoader; this relocates
