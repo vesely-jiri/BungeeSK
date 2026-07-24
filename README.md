@@ -47,12 +47,14 @@ connection:
   port: 20000                 # must match the proxy's config.yml
   password: "YourStrongPassword"   # must match the proxy's config.yml
 reconnect:
-  enabled: true               # auto-reconnect if the link drops
-  initial-delay-seconds: 5
-  max-delay-seconds: 60
+  enabled: true                    # auto-reconnect if the link drops
+  delays-seconds: [5, 10, 20, 30]  # wait before each attempt; last value repeats. [30] = always 30s. [] = exponential
+  initial-delay-seconds: 5         # exponential-backoff fallback (only used when delays-seconds is empty)
+  max-delay-seconds: 60            # exponential-backoff fallback cap
+  log-attempts: false              # true = log every retry; false = only "connection lost" / "reconnected"
 ```
 
-No script needed — the server connects on start and **keeps itself reconnected** with exponential backoff.
+No script needed — the server connects on start and **keeps itself reconnected**. The retry schedule is configurable: a per-attempt list (last value repeats, so `[30]` is a fixed 30s), or leave it empty for exponential backoff between `initial-delay-seconds` and `max-delay-seconds`.
 
 ### Option B — from a script
 
@@ -66,6 +68,15 @@ on load:
 ```
 
 Unlike older versions, you **no longer need a manual `while` retry loop** — auto-reconnect is built in. If the proxy is offline when you connect, BungeeSK keeps retrying on its own.
+
+## 🎛️ Commands
+
+| Where | Command | Subcommands |
+|-------|---------|-------------|
+| Game server (Paper/Spigot) | `/bungeesk` | `status`, `reconnect`, `disconnect`, `reload`, `version` — controls **this server's** link to the proxy |
+| Proxy (BungeeCord / Velocity) | `/bungeeskproxy` (alias `/bsproxy`) | `servers`, `disconnect <ip:port\|all>`, `start`, `stop`, `restart`, `reload` — manages the **proxy listener** |
+
+Both require the `bungeesk.command` permission. The proxy command is `/bungeeskproxy` (not `/bungeesk`) on purpose: a proxy intercepts a `/bungeesk` it owns and would shadow the game-server `/bungeesk`, leaving that one reachable only as the ugly `/bungeesk:bungeesk`.
 
 ## 🆕 What's new in 2.1.0
 
