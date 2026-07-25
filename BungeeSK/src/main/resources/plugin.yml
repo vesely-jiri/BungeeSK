@@ -9,6 +9,7 @@ commands:
   bungeesk:
     description: BungeeSK admin command (status, reconnect, disconnect, reload).
     usage: /bungeesk help
+    aliases: [bsk]
     permission: bungeesk.command
 permissions:
   bungeesk.command:
