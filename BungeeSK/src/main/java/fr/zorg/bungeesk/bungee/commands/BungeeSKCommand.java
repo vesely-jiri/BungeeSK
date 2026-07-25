@@ -13,15 +13,21 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.TabCompleteEvent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.plugin.TabExecutor;
 import net.md_5.bungee.event.EventHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BungeeSKCommand extends Command implements Listener {
+public class BungeeSKCommand extends Command implements TabExecutor, Listener {
 
     public static final String PREFIX = "§6BungeeSK §7» ";
+
+    private static final List<String> SUBCOMMANDS = Arrays.asList(
+            "help", "servers", "disconnect", "start", "stop", "restart", "reload");
 
     public BungeeSKCommand() {
         // Named "bungeeskproxy" (alias "bsproxy") so it does not collide with the game-server-side
@@ -133,6 +139,33 @@ public class BungeeSKCommand extends Command implements Listener {
         } else {
             sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§cUnknown command !"));
         }
+    }
+
+    @Override
+    public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("bungeesk.command"))
+            return Collections.emptyList();
+
+        if (args.length <= 1) {
+            final String prefix = args.length == 0 ? "" : args[0].toLowerCase();
+            return SUBCOMMANDS.stream()
+                    .filter(sub -> sub.startsWith(prefix))
+                    .collect(Collectors.toList());
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("disconnect")) {
+            final String prefix = args[1].toLowerCase();
+            final List<String> options = new ArrayList<>();
+            options.add("all");
+            PacketServer.getClientSockets().stream()
+                    .filter(socket -> socket.isAuthenticated() && socket.getMinecraftPort() != 0)
+                    .forEach(socket -> options.add(socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
+            return options.stream()
+                    .filter(option -> option.toLowerCase().startsWith(prefix))
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 
     @EventHandler

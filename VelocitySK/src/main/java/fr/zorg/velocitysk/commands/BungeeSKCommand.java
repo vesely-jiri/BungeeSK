@@ -13,12 +13,17 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BungeeSKCommand implements SimpleCommand {
 
     public static final String PREFIX = "§6BungeeSK §7» ";
+
+    private static final List<String> SUBCOMMANDS = Arrays.asList(
+            "help", "servers", "disconnect", "start", "stop", "restart", "reload");
 
     @Override
     public void execute(Invocation invocation) {
@@ -127,6 +132,35 @@ public class BungeeSKCommand implements SimpleCommand {
         } else {
             sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§cUnknown command !"));
         }
+    }
+
+    @Override
+    public List<String> suggest(Invocation invocation) {
+        final CommandSource sender = invocation.source();
+        if (!sender.hasPermission("bungeesk.command"))
+            return Collections.emptyList();
+
+        final String[] args = invocation.arguments();
+        if (args.length <= 1) {
+            final String prefix = args.length == 0 ? "" : args[0].toLowerCase();
+            return SUBCOMMANDS.stream()
+                    .filter(sub -> sub.startsWith(prefix))
+                    .collect(Collectors.toList());
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("disconnect")) {
+            final String prefix = args[1].toLowerCase();
+            final List<String> options = new ArrayList<>();
+            options.add("all");
+            PacketServer.getClientSockets().stream()
+                    .filter(socket -> socket.isAuthenticated() && socket.getMinecraftPort() != 0)
+                    .forEach(socket -> options.add(socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort()));
+            return options.stream()
+                    .filter(option -> option.toLowerCase().startsWith(prefix))
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 
 }
