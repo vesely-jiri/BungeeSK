@@ -17,7 +17,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 @Name("Broadcast title to the network or a server")
-@Description("Shows a title to every player on the network, or to every player on a specific server.")
+@Description({"Shows a title to every player on the network, or to every player on a specific server.",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples({"broadcast title \"&aRestart\" with subtitle \"&7in 60s\" to the network",
         "broadcast title \"&cEvent starting!\" for 5 seconds to bungee server named \"lobby\""})
 @Since("2.2.0")

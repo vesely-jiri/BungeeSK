@@ -19,7 +19,8 @@ import org.bukkit.event.Event;
 @Description({"Shows a timed boss bar to a player anywhere on the network, then removes it automatically.",
         "Colour is one of pink, blue, red, green, yellow, purple, white (default purple). Style is one of",
         "solid, segmented_6, segmented_10, segmented_12, segmented_20 (default solid). Progress is 0 to 1",
-        "(default 1). Duration defaults to 5 seconds."})
+        "(default 1). Duration defaults to 5 seconds.",
+        "Note: only works for players on a server running BungeeSK, which shows the boss bar."})
 @Examples({"show boss bar \"&cEvent starts soon!\" to bungee player named \"Notch\"",
         "show boss bar \"&aLoading\" with colour \"green\" with progress 0.5 for 10 seconds to {_bp}"})
 @Since("2.2.0")

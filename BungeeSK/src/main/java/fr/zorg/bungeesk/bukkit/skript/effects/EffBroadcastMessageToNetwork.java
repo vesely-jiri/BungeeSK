@@ -14,7 +14,8 @@ import fr.zorg.bungeesk.common.packets.BroadcastToNetworkPacket;
 import org.bukkit.event.Event;
 
 @Name("Broadcast message to the network")
-@Description("Broadcast message to the network, like the /alert command does but with more personalization (the messages will not appear in the spigot consoles)")
+@Description({"Broadcast message to the network, like the /alert command does but with more personalization (the messages will not appear in the spigot consoles)",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("broadcast \"&6Hello everyone\" to network")
 @Since("1.1.0")
 public class EffBroadcastMessageToNetwork extends Effect {

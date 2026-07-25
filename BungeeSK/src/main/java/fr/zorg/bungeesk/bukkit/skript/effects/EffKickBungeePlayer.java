@@ -15,7 +15,8 @@ import fr.zorg.bungeesk.common.packets.KickBungeePlayerPacket;
 import org.bukkit.event.Event;
 
 @Name("Kick bungee player")
-@Description("Kicks a player on the network from the network")
+@Description({"Kicks a player on the network from the network",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("kick bungee player named \"Notch\" from bungeecord due to \"&cYou're the fake Notch !\"")
 @Since("1.1.0")
 public class EffKickBungeePlayer extends Effect {

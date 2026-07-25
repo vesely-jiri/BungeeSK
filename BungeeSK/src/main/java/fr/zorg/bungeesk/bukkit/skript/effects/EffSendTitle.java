@@ -16,7 +16,8 @@ import fr.zorg.bungeesk.common.packets.SendTitlePacket;
 import org.bukkit.event.Event;
 
 @Name("Send Bungeecord title to bungee player")
-@Description("Send a Bungeecord title to a player on the network")
+@Description({"Send a Bungeecord title to a player on the network",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("send bungeecord title \"&cHey you !\" with subtitle \"&6How are you ? :)\" for 3 seconds to bungee player named \"Notch\" with fade-in 10 ticks and fade-out 2 seconds")
 @Since("1.1.0")
 public class EffSendTitle extends Effect {

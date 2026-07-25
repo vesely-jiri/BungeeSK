@@ -15,7 +15,8 @@ import fr.zorg.bungeesk.common.packets.BroadcastActionBarPacket;
 import org.bukkit.event.Event;
 
 @Name("Broadcast action bar to the network or a server")
-@Description("Shows an action bar message to every player on the network, or to every player on a specific server.")
+@Description({"Shows an action bar message to every player on the network, or to every player on a specific server.",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples({"broadcast action bar \"&eServer restarting soon\" to the network",
         "broadcast action bar \"&aWelcome to the lobby\" to bungee server named \"lobby\""})
 @Since("2.2.0")

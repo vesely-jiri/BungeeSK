@@ -17,7 +17,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 @Name("Send bungee player to server")
-@Description("Send a player on the network to a specific server")
+@Description({"Send a player on the network to a specific server",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("send bungee player named \"Zorg_btw\" to bungee server named \"lobby2\"")
 @Since("1.0.0 - 1.1.0: Usage of BungeeServer type")
 public class EffSendBungeePlayerToServer extends Effect {

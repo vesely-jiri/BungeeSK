@@ -16,7 +16,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 @Name("Broadcast message to server")
-@Description("Broadcasts a message to a server in the network")
+@Description({"Broadcasts a message to a server in the network",
+        "Note: only works if the target server is running BungeeSK."})
 @Examples("broadcast bungee message \"&aHello world !\" to bungee server named \"hub\"")
 @Since("1.0.3 - 1.1.0: Usage of BungeeServer type")
 public class EffBroadcastMessageToServer extends Effect {

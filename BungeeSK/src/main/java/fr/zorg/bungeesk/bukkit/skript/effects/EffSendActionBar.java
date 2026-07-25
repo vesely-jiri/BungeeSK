@@ -15,7 +15,8 @@ import fr.zorg.bungeesk.common.packets.SendActionBarPacket;
 import org.bukkit.event.Event;
 
 @Name("Send action bar message")
-@Description("Send an action bar message to a player on the bungeecord network")
+@Description({"Send an action bar message to a player on the bungeecord network",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("send bungee player named \"Notch\" action bar \"&6Welcome ! :)\"")
 @Since("1.1.0")
 public class EffSendActionBar extends Effect {

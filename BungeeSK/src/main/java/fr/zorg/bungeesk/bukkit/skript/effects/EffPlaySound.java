@@ -16,7 +16,8 @@ import org.bukkit.event.Event;
 
 @Name("Play sound to a bungee player")
 @Description({"Plays a sound to a player anywhere on the network. The sound is a namespaced key, e.g.",
-        "\"entity.experience_orb.pickup\" or \"minecraft:block.note_block.pling\". Volume and pitch default to 1."})
+        "\"entity.experience_orb.pickup\" or \"minecraft:block.note_block.pling\". Volume and pitch default to 1.",
+        "Note: only works for players on a server running BungeeSK, which plays the sound."})
 @Examples({"play bungee sound \"entity.experience_orb.pickup\" to bungee player named \"Notch\"",
         "play bungee sound \"block.note_block.pling\" with volume 1 and pitch 2 to {_bungeeplayer}"})
 @Since("2.2.0")

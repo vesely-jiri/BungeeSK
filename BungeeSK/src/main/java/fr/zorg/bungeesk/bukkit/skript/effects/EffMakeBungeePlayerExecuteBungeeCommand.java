@@ -15,7 +15,8 @@ import fr.zorg.bungeesk.common.packets.MakeBungeePlayerBungeeCommandPacket;
 import org.bukkit.event.Event;
 
 @Name("Make bungee player execute bungee command")
-@Description("Make a player on the bungeecord execute a specific bungeecord-sided command")
+@Description({"Make a player on the bungeecord execute a specific bungeecord-sided command",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("make bungee player named \"Notch\" execute bungee command \"glist\"")
 @Since("2.0.0")
 public class EffMakeBungeePlayerExecuteBungeeCommand extends Effect {

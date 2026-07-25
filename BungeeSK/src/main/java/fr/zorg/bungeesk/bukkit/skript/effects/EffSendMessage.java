@@ -16,7 +16,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 @Name("Send message to bungee player")
-@Description("Send a message to a bungee player on the network")
+@Description({"Send a message to a bungee player on the network",
+        "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
 @Examples("send bungee message \"&6Hello !\" to bungee player named \"Notch\"")
 @Since("1.0.0")
 public class EffSendMessage extends Effect {
