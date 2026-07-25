@@ -16,7 +16,7 @@ public class SendMessageListener extends BungeeSKListener {
             final SendMessagePacket sendMessagePacket = (SendMessagePacket) packet;
             final BungeePlayer bungeePlayer = sendMessagePacket.getBungeePlayer();
             final String message = sendMessagePacket.getMessage();
-            final Player player = VelocityUtils.getPlayer(bungeePlayer);
+            final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player == null)
                 return;
 

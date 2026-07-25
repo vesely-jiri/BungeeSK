@@ -20,7 +20,7 @@ public class MakeBungeePlayerCommandListener extends BungeeSKListener {
             if (!command.startsWith("/"))
                 command = "/" + command;
 
-            final ProxiedPlayer player = BungeeUtils.getPlayer(bungeePlayer);
+            final ProxiedPlayer player = BungeeUtils.getManipulablePlayer(bungeePlayer);
             if (player != null)
                 player.chat(command);
         }

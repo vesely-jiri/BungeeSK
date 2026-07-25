@@ -21,7 +21,7 @@ public class SendTitleListener extends BungeeSKListener {
             final SendTitlePacket sendTitlePacket = (SendTitlePacket) packet;
 
             final BungeePlayer bungeePlayer = sendTitlePacket.getBungeePlayer();
-            final Player player = VelocityUtils.getPlayer(bungeePlayer);
+            final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player == null)
                 return;
 

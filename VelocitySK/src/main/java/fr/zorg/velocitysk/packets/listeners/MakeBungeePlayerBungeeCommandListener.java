@@ -16,7 +16,7 @@ public class MakeBungeePlayerBungeeCommandListener extends BungeeSKListener {
             final MakeBungeePlayerBungeeCommandPacket makeBungeePlayerBungeeCommandPacket = (MakeBungeePlayerBungeeCommandPacket) packet;
             final BungeePlayer bungeePlayer = makeBungeePlayerBungeeCommandPacket.getPlayer();
             final String command = makeBungeePlayerBungeeCommandPacket.getCommand();
-            final Player player = VelocityUtils.getPlayer(bungeePlayer);
+            final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player != null)
                 player.spoofChatInput(command.startsWith("/") ? command.substring(1) : command);
         }

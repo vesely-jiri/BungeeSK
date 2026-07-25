@@ -17,7 +17,7 @@ public class KickBungeePlayerListener extends BungeeSKListener {
             final KickBungeePlayerPacket kickBungeePlayerPacket = (KickBungeePlayerPacket) packet;
             final BungeePlayer bungeePlayer = kickBungeePlayerPacket.getBungeePlayer();
             final String reason = kickBungeePlayerPacket.getReason();
-            final Player player = VelocityUtils.getPlayer(bungeePlayer);
+            final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player == null)
                 return;
 

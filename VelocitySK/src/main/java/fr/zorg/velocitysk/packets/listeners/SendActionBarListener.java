@@ -16,7 +16,7 @@ public class SendActionBarListener extends BungeeSKListener {
             final SendActionBarPacket sendActionBarPacket = (SendActionBarPacket) packet;
             final BungeePlayer bungeePlayer = sendActionBarPacket.getBungeePlayer();
             final String message = sendActionBarPacket.getMessage();
-            final Player proxiedPlayer = VelocityUtils.getPlayer(bungeePlayer);
+            final Player proxiedPlayer = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (proxiedPlayer == null)
                 return;
             proxiedPlayer.sendActionBar(VelocityUtils.getTextComponent(message));

@@ -17,7 +17,7 @@ public class MakeBungeePlayerBungeeCommandListener extends BungeeSKListener {
             final MakeBungeePlayerBungeeCommandPacket makeBungeePlayerBungeeCommandPacket = (MakeBungeePlayerBungeeCommandPacket) packet;
             final BungeePlayer player = makeBungeePlayerBungeeCommandPacket.getPlayer();
             final String command = makeBungeePlayerBungeeCommandPacket.getCommand();
-            final ProxiedPlayer proxiedPlayer = BungeeUtils.getPlayer(player);
+            final ProxiedPlayer proxiedPlayer = BungeeUtils.getManipulablePlayer(player);
             if (proxiedPlayer != null)
                 BungeeSK.getInstance().getProxy().getPluginManager().dispatchCommand(proxiedPlayer, command.startsWith("/") ? command.substring(1) : command);
         }

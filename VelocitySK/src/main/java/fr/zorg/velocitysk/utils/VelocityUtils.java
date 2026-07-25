@@ -1,6 +1,7 @@
 package fr.zorg.velocitysk.utils;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
@@ -16,9 +17,12 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class VelocityUtils {
 
@@ -114,6 +118,39 @@ public class VelocityUtils {
 
     public static BungeePlayer getBungeePlayer(Player player) {
         return new BungeePlayer(player.getUsername(), player.getUniqueId());
+    }
+
+    /** Names of the servers currently authenticated through BungeeSK. */
+    public static Set<String> getBungeeSkServerNames() {
+        return PacketServer.getClientSockets().stream()
+                .filter(SocketServer::isAuthenticated)
+                .map(VelocityUtils::getServerFromSocket)
+                .filter(Objects::nonNull)
+                .map(BungeeServer::getName)
+                .collect(Collectors.toSet());
+    }
+
+    /** Whether the player's current server is connected through BungeeSK. */
+    public static boolean isOnBungeeSkServer(Player player) {
+        if (player == null)
+            return false;
+        final Optional<ServerConnection> connection = player.getCurrentServer();
+        return connection.isPresent()
+                && getBungeeSkServerNames().contains(connection.get().getServerInfo().getName());
+    }
+
+    /**
+     * Resolves the target of a manipulation effect (send, kick, title, ...), honouring the
+     * {@code affect_all_servers} config: when it is false, players on non-BungeeSK servers are
+     * treated as unreachable (returns null, so callers no-op).
+     */
+    public static Player getManipulablePlayer(BungeePlayer bungeePlayer) {
+        final Player player = getPlayer(bungeePlayer);
+        if (player == null)
+            return null;
+        if (BungeeConfig.AFFECT_ALL_SERVERS.get())
+            return player;
+        return isOnBungeeSkServer(player) ? player : null;
     }
 
     /**

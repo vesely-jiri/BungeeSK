@@ -20,7 +20,7 @@ public class MakeBungeePlayerCommandListener extends BungeeSKListener {
             if (!command.startsWith("/"))
                 command = "/" + command;
 
-            final Player player = VelocityUtils.getPlayer(bungeePlayer);
+            final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player != null)
                 player.spoofChatInput(command);
         }

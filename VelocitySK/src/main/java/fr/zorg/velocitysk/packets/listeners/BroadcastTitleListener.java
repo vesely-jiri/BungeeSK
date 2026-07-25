@@ -1,16 +1,20 @@
 package fr.zorg.velocitysk.packets.listeners;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.zorg.bungeesk.common.packets.BroadcastTitlePacket;
 import fr.zorg.bungeesk.common.packets.BungeeSKPacket;
 import fr.zorg.velocitysk.BungeeSK;
 import fr.zorg.velocitysk.api.BungeeSKListener;
 import fr.zorg.velocitysk.packets.SocketServer;
+import fr.zorg.velocitysk.utils.BungeeConfig;
 import fr.zorg.velocitysk.utils.VelocityUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 public class BroadcastTitleListener extends BungeeSKListener {
@@ -22,12 +26,29 @@ public class BroadcastTitleListener extends BungeeSKListener {
         final BroadcastTitlePacket p = (BroadcastTitlePacket) packet;
         final Title title = buildTitle(p);
 
-        if (p.getServerName() == null) {
-            BungeeSK.getServer().showTitle(title);
+        // Default: deliver through the whole-proxy / whole-server Audience.
+        if (BungeeConfig.AFFECT_ALL_SERVERS.get()) {
+            if (p.getServerName() == null) {
+                BungeeSK.getServer().showTitle(title);
+                return;
+            }
+            BungeeSK.getServer().getServer(p.getServerName())
+                    .ifPresent(server -> server.getPlayersConnected().forEach(player -> player.showTitle(title)));
             return;
         }
-        final Optional<RegisteredServer> server = BungeeSK.getServer().getServer(p.getServerName());
-        server.ifPresent(registeredServer -> registeredServer.getPlayersConnected().forEach(player -> player.showTitle(title)));
+
+        // Restricted: only players on BungeeSK-connected servers.
+        final Collection<Player> targets;
+        if (p.getServerName() == null) {
+            targets = BungeeSK.getServer().getAllPlayers();
+        } else {
+            final Optional<RegisteredServer> server = BungeeSK.getServer().getServer(p.getServerName());
+            targets = server.map(RegisteredServer::getPlayersConnected).orElseGet(Collections::emptyList);
+        }
+        targets.forEach(player -> {
+            if (VelocityUtils.isOnBungeeSkServer(player))
+                player.showTitle(title);
+        });
     }
 
     private static Title buildTitle(BroadcastTitlePacket p) {

@@ -17,8 +17,11 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class BungeeUtils {
 
@@ -39,6 +42,36 @@ public class BungeeUtils {
 
     public static BungeePlayer getBungeePlayer(ProxiedPlayer player) {
         return new BungeePlayer(player.getName(), player.getUniqueId());
+    }
+
+    /** Names of the servers currently authenticated through BungeeSK. */
+    public static Set<String> getBungeeSkServerNames() {
+        return PacketServer.getClientSockets().stream()
+                .filter(SocketServer::isAuthenticated)
+                .map(BungeeUtils::getServerFromSocket)
+                .filter(Objects::nonNull)
+                .map(BungeeServer::getName)
+                .collect(Collectors.toSet());
+    }
+
+    /** Whether the player's current server is connected through BungeeSK. */
+    public static boolean isOnBungeeSkServer(ProxiedPlayer player) {
+        return player != null && player.getServer() != null
+                && getBungeeSkServerNames().contains(player.getServer().getInfo().getName());
+    }
+
+    /**
+     * Resolves the target of a manipulation effect (send, kick, title, ...), honouring the
+     * {@code affect_all_servers} config: when it is false, players on non-BungeeSK servers are
+     * treated as unreachable (returns null, so callers no-op).
+     */
+    public static ProxiedPlayer getManipulablePlayer(BungeePlayer bungeePlayer) {
+        final ProxiedPlayer player = getPlayer(bungeePlayer);
+        if (player == null)
+            return null;
+        if (BungeeConfig.AFFECT_ALL_SERVERS.get())
+            return player;
+        return isOnBungeeSkServer(player) ? player : null;
     }
 
     /**

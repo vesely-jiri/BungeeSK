@@ -17,7 +17,7 @@ public class SendActionBarListener extends BungeeSKListener {
             final SendActionBarPacket sendActionBarPacket = (SendActionBarPacket) packet;
             final BungeePlayer bungeePlayer = sendActionBarPacket.getBungeePlayer();
             final String message = sendActionBarPacket.getMessage();
-            final ProxiedPlayer proxiedPlayer = BungeeUtils.getPlayer(bungeePlayer);
+            final ProxiedPlayer proxiedPlayer = BungeeUtils.getManipulablePlayer(bungeePlayer);
             if (proxiedPlayer == null)
                 return;
             proxiedPlayer.sendMessage(ChatMessageType.ACTION_BAR, BungeeUtils.getTextComponent(message));

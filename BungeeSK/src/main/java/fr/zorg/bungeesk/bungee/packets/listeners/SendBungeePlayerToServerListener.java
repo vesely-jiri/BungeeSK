@@ -14,7 +14,7 @@ public class SendBungeePlayerToServerListener extends BungeeSKListener {
     public void onReceive(SocketServer socketServer, BungeeSKPacket packet) {
         if (packet instanceof SendBungeePlayerToServerPacket) {
             final SendBungeePlayerToServerPacket sendBungeePlayerToServerPacket = (SendBungeePlayerToServerPacket) packet;
-            final ProxiedPlayer player = BungeeUtils.getPlayer(sendBungeePlayerToServerPacket.getBungeePlayer());
+            final ProxiedPlayer player = BungeeUtils.getManipulablePlayer(sendBungeePlayerToServerPacket.getBungeePlayer());
             if (player == null)
                 return;
 
