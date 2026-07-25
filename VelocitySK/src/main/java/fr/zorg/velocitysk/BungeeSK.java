@@ -24,7 +24,7 @@ import java.time.Duration;
 @Plugin(
         id = "bungeesk",
         name = "BungeeSK",
-        version = "2.2.0",
+        version = "2.3.0",
         authors = {"Zorg"},
         url = "https://github.com/ZorgBtw/BungeeSK"
 )
@@ -85,7 +85,7 @@ public class BungeeSK {
 
     private String getVersion() {
         return BungeeSK.getServer().getPluginManager().getPlugin("bungeesk")
-                .flatMap(c -> c.getDescription().getVersion()).orElse("2.2.0");
+                .flatMap(c -> c.getDescription().getVersion()).orElse("2.3.0");
     }
 
     public static ProxyServer getServer() {

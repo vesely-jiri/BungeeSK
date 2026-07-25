@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.3.0
 
 ### Security
 - **Generated connection password now uses `SecureRandom`** instead of `java.util.Random` / `Math.random()`, so a freshly generated password is cryptographically strong. Existing passwords in `config.yml` are unchanged (delete the `password` line and restart to regenerate).
