@@ -5,8 +5,8 @@ import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
 
 public enum BungeeConfig {
 
@@ -106,10 +106,14 @@ public enum BungeeConfig {
                 "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "!", "/", ":", ";", ",", "*"
         };
+        // SecureRandom (not java.util.Random/Math.random): the password guards the socket, so it must
+        // be cryptographically strong, not seeded from wall-clock time. Local instance on purpose —
+        // this runs inside enum-constant init, before any static field below the constants exists.
+        final SecureRandom random = new SecureRandom();
         final StringBuilder builder = new StringBuilder();
         for (int loop = 0; loop < 16; loop++) {
-            final String value = dataSet[new Random().nextInt(dataSet.length)];
-            if (Math.random() > 0.5)
+            final String value = dataSet[random.nextInt(dataSet.length)];
+            if (random.nextBoolean())
                 builder.append(value.toUpperCase());
             else
                 builder.append(value);
