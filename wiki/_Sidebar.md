@@ -3,6 +3,7 @@
 - [Home](Home)
 - [Installation](Installation)
 - [Configuration](Configuration)
+- [Networking & Firewall](Networking-and-Firewall)
 - [Commands](Commands)
 - [Skript Syntax](Skript-Syntax)
 - [Colors & Formatting](Colors-and-Formatting)

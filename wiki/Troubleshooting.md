@@ -4,7 +4,7 @@
 
 - **Port / password mismatch.** The `port` and `password` must be **identical** on the proxy and every game server. A wrong password fails the handshake.
 - **Proxy not listening.** On the proxy, run `/bungeeskproxy servers` — if it says *“currently stopped”*, run `/bungeeskproxy start`.
-- **Firewall.** The proxy's BungeeSK `port` (default `20000`) must be reachable from the game servers. This is a **separate** port from the Minecraft/proxy port.
+- **Firewall / networking.** The proxy's BungeeSK `port` (default `20000`) must be reachable from the game servers. This is a **separate** port from the Minecraft/proxy port. On Pterodactyl it also needs to be an **allocation** on the proxy, and game servers connect via the proxy's internal IP (not `127.0.0.1`) — see **[Networking & Firewall](Networking-and-Firewall)**.
 - **Auto-connect off.** On the game server, check `connection.auto-connect: true`, or connect from a script.
 
 You can watch the state on the game server with `/bungeesk status`.
