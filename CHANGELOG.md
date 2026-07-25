@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+### Security
+- **Generated connection password now uses `SecureRandom`** instead of `java.util.Random` / `Math.random()`, so a freshly generated password is cryptographically strong. Existing passwords in `config.yml` are unchanged (delete the `password` line and restart to regenerate).
+
+### Fixes
+- **`/bungeeskproxy servers` no longer lists port-scanner connections.** Internet scanners that reached an exposed socket showed up as bogus `IP:0` entries; the list now shows only authenticated, registered servers. The IP whitelist also correctly rejects a non-whitelisted connection instead of still registering it.
+
+### Features
+- **`affect_all_servers` proxy config** (default `true`). Set to `false` to make broadcasts and player effects (send, title, action bar, kick, send to server, make run command) only reach players whose current server is connected through BungeeSK.
+- **`/bsk` alias** for the game-server `/bungeesk` command.
+- **Tab-completion** for the proxy `/bungeeskproxy` command — subcommands, plus connected `IP:port`s for `disconnect`.
+
+### Docs
+- Each effect's description now notes whether it can reach players on servers without BungeeSK installed.
+- New wiki page **Networking & Firewall** (Pterodactyl allocations, keeping the socket port private with a firewall / IP whitelist). Fixed the proxy `config.yml` example: proxy keys keep underscores (`whitelist_ip`, `files.sync_at_connect`), game-server keys use hyphens.
+
+### Internal
+- Added unit tests for the packet codec, UUID encoding and `Pair`.
+- Enabled the Gradle build cache, parallel builds and the configuration cache.
+- The release workflow now publishes the matching CHANGELOG section as the GitHub Release notes (instead of an auto-generated commit list).
+
 ## 2.2.0
 
 ### New Skript syntaxes
