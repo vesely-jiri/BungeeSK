@@ -13,6 +13,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BungeeSKCommand implements SimpleCommand {
 
@@ -41,12 +43,18 @@ public class BungeeSKCommand implements SimpleCommand {
                 return;
             }
 
-            if (PacketServer.getClientSockets().size() == 0) {
+            // Only list authenticated, fully-registered backends. Internet port-scanners hitting the
+            // exposed socket get accepted (then dropped after 5s by the watchdog) and would otherwise
+            // show here as bogus "IP:0" entries with no server name.
+            final List<SocketServer> connected = PacketServer.getClientSockets().stream()
+                    .filter(socket -> socket.isAuthenticated() && socket.getMinecraftPort() != 0)
+                    .collect(Collectors.toList());
+            if (connected.isEmpty()) {
                 sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§fNo servers are connected to BungeeSK"));
                 return;
             }
             sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§3Servers"));
-            PacketServer.getClientSockets().forEach(socket -> {
+            connected.forEach(socket -> {
                 String message = "  §8» §6" + socket.getSocket().getInetAddress().getHostAddress() + ":" + socket.getMinecraftPort();
                 final BungeeServer server = VelocityUtils.getServerFromSocket(socket);
                 if (server != null)

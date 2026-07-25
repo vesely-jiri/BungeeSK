@@ -43,9 +43,13 @@ public class PacketServer {
         while (!serverSocket.isClosed()) {
             try {
                 final Socket socketClient = serverSocket.accept();
+                // Reject non-whitelisted IPs BEFORE registering the socket. Without the continue the
+                // closed socket was still wrapped in a SocketServer and left in clientSockets.
                 if (BungeeConfig.WHITELIST_IP$ENABLE.get()) {
-                    if (!whitelist.contains(socketClient.getInetAddress().getHostAddress()))
+                    if (!whitelist.contains(socketClient.getInetAddress().getHostAddress())) {
                         socketClient.close();
+                        continue;
+                    }
                 }
                 final SocketServer clientSocket = new SocketServer(socketClient);
                 clientSockets.add(clientSocket);
