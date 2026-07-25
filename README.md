@@ -29,7 +29,7 @@ One jar does it all:
 |----------------|-------------------------------------------------------------------------------|
 | `BungeeSK.jar` | Every **game server** and your **proxy** (BungeeCord **or** Velocity) — drop the same file into `plugins/` everywhere. |
 
-Grab it from the [latest release](https://github.com/ZorgBtw/BungeeSK/releases/latest), or [build from source](#-building-from-source). Make sure [Skript](https://github.com/SkriptLang/Skript/releases/latest) is installed on every game server.
+Grab it from the [latest release](https://github.com/vesely-jiri/BungeeSK/releases/latest), or [build from source](#-building-from-source). Make sure [Skript](https://github.com/SkriptLang/Skript/releases/latest) is installed on every game server.
 
 ## 🚀 Getting connected
 
@@ -130,5 +130,5 @@ It is fused from two internal, per-platform jars (`BungeeSK/build/libs/BungeeSK-
 ## 📚 Support
 
 - [**Discord server**](https://discord.gg/PCnyMDsTRA)
-- [**Wiki**](https://bungeesk.zorgdev.fr)
+- [**Wiki**](https://github.com/vesely-jiri/BungeeSK/wiki)
 - Docs: [SkriptHub](https://skripthub.net/docs/?addon=BungeeSK) · [skUnity](https://docs.skunity.com/syntax/search/addon:bungeesk)
