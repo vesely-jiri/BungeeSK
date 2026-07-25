@@ -77,21 +77,9 @@ Unlike older versions, you **no longer need a manual `while` retry loop** — au
 
 Both require the `bungeesk.command` permission. The proxy command is `/bungeeskproxy` (not `/bungeesk`) on purpose: a proxy intercepts a `/bungeesk` it owns and would shadow the game-server `/bungeesk`, leaving that one reachable only as the ugly `/bungeesk:bungeesk`.
 
-## 🆕 What's new in 2.1.0
+## 🆕 Changelog
 
-- **Runs on Minecraft 1.21.11 / Paper / Java 21** (updated from 1.20 / Java 11); built with Skript 2.16, Gradle 9.6.1, and the maintained `com.gradleup.shadow`.
-- **Auto-reconnect** with exponential backoff — no more manual retry loops. A wrong password stops the loop (and tells you).
-- **`config.yml`** on the game-server side with **auto-connect**.
-- **Connection status & control** from Skript:
-  - `bungee connection state` → `"connected"`, `"connecting"`, `"reconnecting"`, `"disconnected"`
-  - `reconnect to the proxy`
-  - `disconnect the client` now also disables auto-reconnect (stays disconnected until you reconnect)
-- **Hex & MiniMessage colors** in messages/titles/action bars/broadcasts:
-  - Hex `&#ff5555` works on **both** proxies.
-  - MiniMessage (`<gradient:...>`, `<#ff0000>`, `<bold>` …) works on **both** proxies (native Adventure on Velocity; a shaded, relocated Adventure on BungeeCord).
-- **Security hardening:** Java deserialization is now whitelisted (BungeeSK/JDK types only) at every socket read — closes a pre-authentication remote-code-execution vector.
-- **Performance/stability:** a shared async thread pool (instead of a new thread per packet) and serialized socket writes (fixes a latent stream-corruption race).
-- The update checker now actually works (it was silently 403'd by GitHub for missing a `User-Agent`) and never blocks or spams startup.
+Per-release changes are tracked in **[CHANGELOG.md](CHANGELOG.md)** — kept current there instead of duplicated here.
 
 ## 🎨 Colors & formatting
 
