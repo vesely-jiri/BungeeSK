@@ -21,7 +21,10 @@ public class SocketClient {
     private ObjectOutputStream writer;
     private ObjectInputStream reader;
     private Thread readThread;
-    private boolean encrypting;
+    // volatile: flipped on an async write task after the AuthComplete exchange, then read on the read
+    // thread and other send tasks — they must see the post-handshake value (esp. the replayed offline
+    // packets), else a packet could be (de)serialized with the wrong encryption state.
+    private volatile boolean encrypting;
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
     /**

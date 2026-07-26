@@ -41,7 +41,9 @@ public class FutureUtils {
 
     public static Object generateFuture(SocketServer server, BungeeSKPacket packet) {
 
-        if (!PacketServer.isConnected())
+        // Fast-fail on THIS socket too (PacketServer.isConnected() is only the proxy's own listener):
+        // no point allocating a future and blocking the full timeout on a client that's already gone.
+        if (!PacketServer.isConnected() || !server.isConnected())
             return null;
 
         final UUID randomUUID = UUID.randomUUID(); // Using a random UUID here to prevent from mixing between 2 actions at the same time

@@ -11,6 +11,7 @@ import fr.zorg.bungeesk.common.packets.*;
 import fr.zorg.bungeesk.common.utils.EncryptionUtils;
 import fr.zorg.bungeesk.common.utils.PacketUtils;
 import fr.zorg.bungeesk.common.utils.SafeSerialization;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,6 +20,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SocketServer {
 
@@ -36,7 +38,9 @@ public class SocketServer {
     private boolean encrypting;
     private int minecraftPort;
     private long ping;
-    private int missedKeepAlives = 0;
+    private volatile int missedKeepAlives = 0;
+    private ScheduledTask keepAliveTask;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     public SocketServer(Socket socket) {
         this.socket = socket;
@@ -131,7 +135,14 @@ public class SocketServer {
     }
 
     public void disconnect() {
-        if (this.isConnected()) {
+        // Idempotent: the read thread, the auth watchdog and the keep-alive task can all reach here at
+        // once — run teardown (and the single server-stop broadcast) exactly once, and stop the keep-alive
+        // task so it doesn't linger firing against a dead socket.
+        if (!this.closed.compareAndSet(false, true))
+            return;
+        if (this.keepAliveTask != null)
+            this.keepAliveTask.cancel();
+        {
             Debug.log("Disconnecting client with IP " + socket.getInetAddress().getHostAddress() + ":" + this.minecraftPort);
             final BungeeServer server = BungeeUtils.getServerFromSocket(this);
             PacketServer.getClientSockets().remove(this);
@@ -199,7 +210,7 @@ public class SocketServer {
     }
 
     public void startKeepAlive() {
-        BungeeSK.getInstance().getProxy().getScheduler().schedule(BungeeSK.getInstance(), this::sendKeepAlive, 1, 5, TimeUnit.SECONDS);
+        this.keepAliveTask = BungeeSK.getInstance().getProxy().getScheduler().schedule(BungeeSK.getInstance(), this::sendKeepAlive, 1, 5, TimeUnit.SECONDS);
     }
 
     public void sendKeepAlive() {

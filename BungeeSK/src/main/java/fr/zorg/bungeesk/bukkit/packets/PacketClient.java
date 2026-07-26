@@ -39,9 +39,11 @@ public class PacketClient {
 
     private static final int CONNECT_TIMEOUT_MS = 10_000;
 
-    private static ClientBuilder builder;
-    private static Socket socket;
-    private static SocketClient client;
+    // volatile: written under the class lock but read lock-free on the Skript/effect and reconnect paths
+    // (sendPacket/isConnected/flushOfflineQueue), so readers must see the latest published reference.
+    private static volatile ClientBuilder builder;
+    private static volatile Socket socket;
+    private static volatile SocketClient client;
 
     private static volatile State state = State.DISCONNECTED;
 
