@@ -1,15 +1,14 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions.bungeeconn;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.sections.SecConnectToServer;
 import fr.zorg.bungeesk.bukkit.utils.ClientBuilder;
 import org.bukkit.event.Event;
@@ -27,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprLastConnection extends SimpleExpression<ClientBuilder> {
 
     static {
-        Skript.registerExpression(ExprLastConnection.class, ClientBuilder.class, ExpressionType.SIMPLE,
+        Syntax.expression(ExprLastConnection.class, ExprLastConnection::new, ClientBuilder.class,
                 "[the] [last] [(generated|created)] (connection|server)");
     }
 

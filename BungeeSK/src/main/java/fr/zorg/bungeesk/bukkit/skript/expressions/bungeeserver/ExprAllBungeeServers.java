@@ -1,15 +1,14 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions.bungeeserver;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.utils.CompletableFutureUtils;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.bungeesk.common.packets.GetAllBungeeServersPacket;
@@ -26,8 +25,8 @@ import java.util.ArrayList;
 public class ExprAllBungeeServers extends SimpleExpression<BungeeServer> {
 
     static {
-        Skript.registerExpression(ExprAllBungeeServers.class, BungeeServer.class,
-                ExpressionType.SIMPLE, "[(all [[of] the]|the)] [bungee] servers");
+        Syntax.expression(ExprAllBungeeServers.class, ExprAllBungeeServers::new, BungeeServer.class,
+                "[(all [[of] the]|the)] [bungee] servers");
     }
 
     @Override

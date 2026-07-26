@@ -8,6 +8,7 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.*;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.utils.ClientBuilder;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +29,7 @@ public class SecConnectToServer extends EffectSection {
     public static ClientBuilder builder;
 
     static {
-        Skript.registerSection(SecConnectToServer.class, "(create|init) new bungee connection");
+        Syntax.section(SecConnectToServer.class, SecConnectToServer::new, "(create|init) new bungee connection");
     }
 
     @Override

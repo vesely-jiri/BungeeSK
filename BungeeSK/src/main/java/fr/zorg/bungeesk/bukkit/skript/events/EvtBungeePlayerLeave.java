@@ -1,21 +1,22 @@
 package fr.zorg.bungeesk.bukkit.skript.events;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePlayerLeaveEvent;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 
 public class EvtBungeePlayerLeave {
 
     static {
-        Skript.registerEvent("bungee player leave", SimpleEvent.class, BungeePlayerLeaveEvent.class,
-                        "bungee [player] (leave|quit)")
-                .description("When a bungee player leaves the network")
-                .examples("on bungee player leave:", "\tset {_player} to event-bungeeplayer",
-                        "on bungee player quit:" +
-                                "\tbroadcast \"The player was in the %past-server% server !\"")
-                .since("1.0.0");
+        Syntax.registerEvent(
+                Syntax.event(SimpleEvent.class, SimpleEvent::new, "bungee player leave", BungeePlayerLeaveEvent.class,
+                                "bungee [player] (leave|quit)")
+                        .addDescription("When a bungee player leaves the network")
+                        .addExamples("on bungee player leave:", "\tset {_player} to event-bungeeplayer",
+                                "on bungee player quit:" +
+                                        "\tbroadcast \"The player was in the %past-server% server !\"")
+                        .addSince("1.0.0"));
 
         EventValues.registerEventValue(BungeePlayerLeaveEvent.class, BungeePlayer.class, BungeePlayerLeaveEvent::getPlayer);
     }

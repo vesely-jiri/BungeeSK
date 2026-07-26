@@ -7,13 +7,13 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.variables.SerializedVariable;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.CustomRequestEvent;
 import fr.zorg.bungeesk.common.utils.Pair;
 import org.bukkit.event.Event;
@@ -30,7 +30,7 @@ import org.bukkit.event.Event;
 public class ExprCustomRequestResponse extends SimpleExpression<Object> {
 
     static {
-        Skript.registerExpression(ExprCustomRequestResponse.class, Object.class, ExpressionType.SIMPLE, "custom request response");
+        Syntax.expression(ExprCustomRequestResponse.class, ExprCustomRequestResponse::new, Object.class, "custom request response");
     }
 
     @Override

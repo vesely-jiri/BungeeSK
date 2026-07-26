@@ -1,19 +1,18 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.variables.SerializedVariable;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.bukkit.utils.CompletableFutureUtils;
 import fr.zorg.bungeesk.common.entities.GlobalVariableChanger;
@@ -31,7 +30,7 @@ import org.bukkit.event.Event;
 public class ExprGlobalVariables extends SimpleExpression<Object> {
 
     static {
-        Skript.registerExpression(ExprGlobalVariables.class, Object.class, ExpressionType.SIMPLE, "global var[iable] [named] %string%");
+        Syntax.expression(ExprGlobalVariables.class, ExprGlobalVariables::new, Object.class, "global var[iable] [named] %string%");
     }
 
     private Expression<String> varName;

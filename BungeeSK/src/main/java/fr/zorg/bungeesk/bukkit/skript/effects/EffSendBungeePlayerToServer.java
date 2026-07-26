@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -9,6 +8,7 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public class EffSendBungeePlayerToServer extends Effect {
 
     static {
-        Skript.registerEffect(EffSendBungeePlayerToServer.class,
+        Syntax.effect(EffSendBungeePlayerToServer.class, EffSendBungeePlayerToServer::new,
                 "send %bungeeplayer% to %bungeeserver%");
     }
 

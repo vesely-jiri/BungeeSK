@@ -1,15 +1,14 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions.bungeeplayer;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.utils.CompletableFutureUtils;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.packets.BungeePlayerNamedPacket;
@@ -23,9 +22,8 @@ import org.jetbrains.annotations.Nullable;
 public class ExprBungeePlayerFromName extends SimpleExpression<BungeePlayer> {
 
     static {
-        Skript.registerExpression(ExprBungeePlayerFromName.class,
+        Syntax.expression(ExprBungeePlayerFromName.class, ExprBungeePlayerFromName::new,
                 BungeePlayer.class,
-                ExpressionType.SIMPLE,
                 "bungee[ ]player (with name|named) %string%");
     }
 

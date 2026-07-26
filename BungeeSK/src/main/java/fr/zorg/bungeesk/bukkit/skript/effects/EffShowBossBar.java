@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -10,6 +9,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.Timespan;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.packets.ShowBossBarPacket;
@@ -27,7 +27,7 @@ import org.bukkit.event.Event;
 public class EffShowBossBar extends Effect {
 
     static {
-        Skript.registerEffect(EffShowBossBar.class,
+        Syntax.effect(EffShowBossBar.class, EffShowBossBar::new,
                 "show boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayer%");
     }
 
@@ -71,7 +71,7 @@ public class EffShowBossBar extends Effect {
         if (this.duration != null) {
             final Timespan timespan = this.duration.getSingle(e);
             if (timespan != null)
-                durationTicks = timespan.getTicks_i();
+                durationTicks = timespan.getAs(Timespan.TimePeriod.TICK);
         }
 
         PacketClient.sendPacket(new ShowBossBarPacket(bungeePlayer, title, color, style, progress, durationTicks));

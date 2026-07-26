@@ -10,6 +10,7 @@
 - Both proxies' request/response map is now a `ConcurrentHashMap` (it was a plain `HashMap` accessed from two threads) and no longer leaks a pending entry when a round-trip times out.
 - `SO_KEEPALIVE` is enabled on the proxy and game-server sockets so an idle link isn't silently reaped by a NAT/conntrack table.
 - Added unit tests for the offline packet buffer (FIFO drain, TTL expiry, overflow eviction).
+- Migrated all Skript syntax registration off the deprecated (marked-for-removal) `Skript.registerEffect/registerExpression/registerCondition/registerSection/registerEvent` + `ExpressionType` APIs to the modern `SyntaxRegistry`, via a single `Syntax` helper. Also replaced the deprecated `Timespan.getTicks_i()`/`getTicks()` with `getAs(TimePeriod.TICK)`. No behaviour change; clears those build warnings.
 
 ## 2.3.0
 

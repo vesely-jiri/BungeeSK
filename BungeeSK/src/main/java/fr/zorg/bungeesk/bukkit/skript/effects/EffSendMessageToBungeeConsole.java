@@ -1,10 +1,10 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.packets.SendMessageToConsolePacket;
 import org.bukkit.event.Event;
@@ -12,7 +12,7 @@ import org.bukkit.event.Event;
 public class EffSendMessageToBungeeConsole extends Effect {
 
     static {
-        Skript.registerEffect(EffSendMessageToBungeeConsole.class,
+        Syntax.effect(EffSendMessageToBungeeConsole.class, EffSendMessageToBungeeConsole::new,
                 "send %string% to bungee console");
     }
 

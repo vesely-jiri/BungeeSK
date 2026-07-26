@@ -6,10 +6,10 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePingEvent;
 import org.bukkit.event.Event;
 
@@ -20,7 +20,7 @@ import org.bukkit.event.Event;
 public class ExprPingAddress extends SimpleExpression<String> {
 
     static {
-        Skript.registerExpression(ExprPingAddress.class, String.class, ExpressionType.SIMPLE, "bungee ip of pinger", "pinger's bungee ip [address]");
+        Syntax.expression(ExprPingAddress.class, ExprPingAddress::new, String.class, "bungee ip of pinger", "pinger's bungee ip [address]");
     }
 
     private boolean isBungeePingEvent;

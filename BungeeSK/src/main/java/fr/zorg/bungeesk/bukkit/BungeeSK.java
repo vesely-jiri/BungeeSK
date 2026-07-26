@@ -2,6 +2,7 @@ package fr.zorg.bungeesk.bukkit;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 import fr.zorg.bungeesk.bukkit.api.BukkitAPI;
 import fr.zorg.bungeesk.bukkit.commands.BungeeSKCommand;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
@@ -25,6 +26,7 @@ public class BungeeSK extends JavaPlugin implements Listener {
 
     private static BukkitAPI api;
     private static ExecutorService executor;
+    private static SyntaxRegistry syntaxRegistry;
     private Metrics metrics;
 
     @Override
@@ -43,6 +45,9 @@ public class BungeeSK extends JavaPlugin implements Listener {
         api.registerListeners("fr.zorg.bungeesk.bukkit.packets.listeners", this);
 
         final SkriptAddon addon = Skript.registerAddon(this);
+        // Published before loadClasses(): loading the skript package runs each syntax class's static
+        // initializer, which registers itself through Syntax -> getSyntaxRegistry().
+        syntaxRegistry = addon.syntaxRegistry();
         try {
             addon.loadClasses("fr.zorg.bungeesk.bukkit.skript");
         } catch (IOException ex) {
@@ -170,6 +175,11 @@ public class BungeeSK extends JavaPlugin implements Listener {
 
     public static BukkitAPI getApi() {
         return api;
+    }
+
+    /** Skript's syntax registry for this addon; set during {@link #onEnable()} before syntaxes load. */
+    public static SyntaxRegistry getSyntaxRegistry() {
+        return syntaxRegistry;
     }
 
     public static void callEvent(Event event) {

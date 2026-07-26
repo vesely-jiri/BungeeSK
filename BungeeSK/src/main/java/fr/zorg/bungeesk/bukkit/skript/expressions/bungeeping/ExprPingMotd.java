@@ -7,11 +7,11 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePingEvent;
 import org.bukkit.event.Event;
 
@@ -22,7 +22,7 @@ import org.bukkit.event.Event;
 public class ExprPingMotd extends SimpleExpression<String> {
 
     static {
-        Skript.registerExpression(ExprPingMotd.class, String.class, ExpressionType.SIMPLE, "ping motd");
+        Syntax.expression(ExprPingMotd.class, ExprPingMotd::new, String.class, "ping motd");
     }
 
     private boolean isBungeePingEvent;

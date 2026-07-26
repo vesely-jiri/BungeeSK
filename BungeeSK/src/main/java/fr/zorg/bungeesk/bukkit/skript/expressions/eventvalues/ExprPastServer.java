@@ -6,11 +6,11 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePlayerLeaveEvent;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.ServerSwitchEvent;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
@@ -27,9 +27,8 @@ import org.jetbrains.annotations.Nullable;
 public class ExprPastServer extends SimpleExpression<BungeeServer> {
 
     static {
-        Skript.registerExpression(ExprPastServer.class,
+        Syntax.expression(ExprPastServer.class, ExprPastServer::new,
                 BungeeServer.class,
-                ExpressionType.SIMPLE,
                 "past-server");
     }
 

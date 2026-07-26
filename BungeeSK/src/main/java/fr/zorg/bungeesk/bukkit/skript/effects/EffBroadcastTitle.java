@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -10,6 +9,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.Timespan;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.bungeesk.common.packets.BroadcastTitlePacket;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 public class EffBroadcastTitle extends Effect {
 
     static {
-        Skript.registerEffect(EffBroadcastTitle.class,
+        Syntax.effect(EffBroadcastTitle.class, EffBroadcastTitle::new,
                 "broadcast [bungee[cord]] title %string% [with subtitle %-string%] [for %-timespan%] [with fade-in %-timespan%] [(and|with) fade-out %-timespan%] to [the] network",
                 "broadcast [bungee[cord]] title %string% [with subtitle %-string%] [for %-timespan%] [with fade-in %-timespan%] [(and|with) fade-out %-timespan%] to %bungeeserver%");
     }
@@ -73,7 +73,7 @@ public class EffBroadcastTitle extends Effect {
         if (expr == null)
             return null;
         final Timespan timespan = expr.getSingle(e);
-        return timespan == null ? null : timespan.getTicks_i();
+        return timespan == null ? null : timespan.getAs(Timespan.TimePeriod.TICK);
     }
 
     @Override

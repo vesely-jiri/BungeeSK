@@ -1,15 +1,14 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprConnectionState extends SimpleExpression<String> {
 
     static {
-        Skript.registerExpression(ExprConnectionState.class, String.class, ExpressionType.SIMPLE,
+        Syntax.expression(ExprConnectionState.class, ExprConnectionState::new, String.class,
                 "[the] [bungee[cord]|proxy] connection (state|status)");
     }
 

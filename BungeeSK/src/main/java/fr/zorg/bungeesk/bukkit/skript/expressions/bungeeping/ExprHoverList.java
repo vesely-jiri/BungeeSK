@@ -7,11 +7,11 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePingEvent;
 import org.bukkit.event.Event;
 
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 public class ExprHoverList extends SimpleExpression<String> {
 
     static {
-        Skript.registerExpression(ExprHoverList.class, String.class, ExpressionType.SIMPLE, "hover list");
+        Syntax.expression(ExprHoverList.class, ExprHoverList::new, String.class, "hover list");
     }
 
     private boolean isBungeePingEvent;

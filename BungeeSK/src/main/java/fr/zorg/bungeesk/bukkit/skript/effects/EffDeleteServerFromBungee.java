@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -9,6 +8,7 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.packets.DeleteServerFromBungeePacket;
 import org.bukkit.event.Event;
@@ -20,7 +20,7 @@ import org.bukkit.event.Event;
 public class EffDeleteServerFromBungee extends Effect {
 
     static {
-        Skript.registerEffect(EffDeleteServerFromBungee.class,
+        Syntax.effect(EffDeleteServerFromBungee.class, EffDeleteServerFromBungee::new,
                 "delete server named %string% from [the] bungeecord");
     }
 

@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -10,6 +9,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.Timespan;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.packets.SendTitlePacket;
@@ -23,7 +23,7 @@ import org.bukkit.event.Event;
 public class EffSendTitle extends Effect {
 
     static {
-        Skript.registerEffect(EffSendTitle.class,
+        Syntax.effect(EffSendTitle.class, EffSendTitle::new,
                 "send bungee[cord] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayer% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
     }
 
@@ -52,9 +52,9 @@ public class EffSendTitle extends Effect {
 
         final String title = this.title == null ? "NONE" : this.title.getSingle(e);
         final String subTitle = this.subTitle == null ? null : this.subTitle.getSingle(e);
-        final Long time = this.time == null ? null : this.time.getSingle(e).getTicks_i();
-        final Long fadeIn = this.fadeIn == null ? null : this.fadeIn.getSingle(e).getTicks_i();
-        final Long fadeOut = this.fadeOut == null ? null : this.fadeOut.getSingle(e).getTicks_i();
+        final Long time = this.time == null ? null : this.time.getSingle(e).getAs(Timespan.TimePeriod.TICK);
+        final Long fadeIn = this.fadeIn == null ? null : this.fadeIn.getSingle(e).getAs(Timespan.TimePeriod.TICK);
+        final Long fadeOut = this.fadeOut == null ? null : this.fadeOut.getSingle(e).getAs(Timespan.TimePeriod.TICK);
 
         final SendTitlePacket packet = new SendTitlePacket(this.player.getSingle(e), title, subTitle, time, fadeIn, fadeOut);
         PacketClient.sendPacket(packet);

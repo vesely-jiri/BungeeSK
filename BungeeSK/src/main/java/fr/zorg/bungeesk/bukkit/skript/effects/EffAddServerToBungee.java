@@ -1,10 +1,10 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeeServerBuilder;
 import fr.zorg.bungeesk.common.packets.AddServerToBungeePacket;
@@ -13,7 +13,7 @@ import org.bukkit.event.Event;
 public class EffAddServerToBungee extends Effect {
 
     static {
-        Skript.registerEffect(EffAddServerToBungee.class,
+        Syntax.effect(EffAddServerToBungee.class, EffAddServerToBungee::new,
                 "put [dynamic server] %serverbuilder% into bungeecord");
     }
 

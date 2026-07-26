@@ -8,6 +8,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.TriggerItem;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.common.entities.BungeeServerBuilder;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,7 @@ public class SecCreateBungeeServer extends EffectSection {
     public static BungeeServerBuilder builder;
 
     static {
-        Skript.registerSection(SecCreateBungeeServer.class, "create new bungee server");
+        Syntax.section(SecCreateBungeeServer.class, SecCreateBungeeServer::new, "create new bungee server");
     }
 
     @Override

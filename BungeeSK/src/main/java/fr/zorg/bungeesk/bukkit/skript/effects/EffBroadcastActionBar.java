@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -9,6 +8,7 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.bungeesk.common.packets.BroadcastActionBarPacket;
@@ -23,7 +23,7 @@ import org.bukkit.event.Event;
 public class EffBroadcastActionBar extends Effect {
 
     static {
-        Skript.registerEffect(EffBroadcastActionBar.class,
+        Syntax.effect(EffBroadcastActionBar.class, EffBroadcastActionBar::new,
                 "broadcast [bungee[cord]] action bar [message] %string% to [the] network",
                 "broadcast [bungee[cord]] action bar [message] %string% to %bungeeserver%");
     }

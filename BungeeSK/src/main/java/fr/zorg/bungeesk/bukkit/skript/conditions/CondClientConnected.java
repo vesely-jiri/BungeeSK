@@ -1,6 +1,5 @@
 package fr.zorg.bungeesk.bukkit.skript.conditions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -9,6 +8,7 @@ import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 public class CondClientConnected extends Condition {
 
     static {
-        Skript.registerCondition(CondClientConnected.class,
+        Syntax.condition(CondClientConnected.class, CondClientConnected::new,
                 "client is connected",
                 "client is(n't| not) connected");
     }

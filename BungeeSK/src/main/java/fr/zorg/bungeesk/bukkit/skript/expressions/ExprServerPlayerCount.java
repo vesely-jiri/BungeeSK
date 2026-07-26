@@ -1,16 +1,16 @@
 package fr.zorg.bungeesk.bukkit.skript.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.utils.CompletableFutureUtils;
+import org.skriptlang.skript.registration.SyntaxInfo;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.bungeesk.common.packets.GetServerPlayerCountPacket;
 import org.bukkit.event.Event;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprServerPlayerCount extends SimpleExpression<Long> {
 
     static {
-        Skript.registerExpression(ExprServerPlayerCount.class, Long.class, ExpressionType.COMBINED,
+        Syntax.expression(ExprServerPlayerCount.class, ExprServerPlayerCount::new, Long.class, SyntaxInfo.COMBINED,
                 "[the] [bungee] player[s] count (of|on) %bungeeserver%",
                 "%bungeeserver%'[s] [bungee] player[s] count");
     }
