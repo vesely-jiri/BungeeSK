@@ -6,6 +6,7 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprBungeePlayerUuid extends SimplePropertyExpression<BungeePlayer, String> {
 
     static {
-        register(ExprBungeePlayerUuid.class,
+        Syntax.property(ExprBungeePlayerUuid.class,
                 String.class,
                 "bungee uuid",
                 "bungeeplayer");

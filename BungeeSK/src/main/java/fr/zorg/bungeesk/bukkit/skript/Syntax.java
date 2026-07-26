@@ -1,5 +1,6 @@
 package fr.zorg.bungeesk.bukkit.skript;
 
+import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
@@ -64,6 +65,20 @@ public final class Syntax {
                                                                Class<R> returnType, String... patterns) {
         registry().register(SyntaxRegistry.EXPRESSION,
                 DefaultSyntaxInfos.Expression.simple(type, supplier, returnType, patterns));
+    }
+
+    /**
+     * Registers a property expression (e.g. {@code [the] address of %bungeeserver%}) via
+     * {@link PropertyExpression}, which generates the two property patterns for you. Both of its static
+     * {@code register} overloads are deprecated for removal in Skript 2.16, and the only non-deprecated
+     * path is to hand-build a {@code DefaultSyntaxInfos.Expression} with the property patterns spelled
+     * out — so the deprecation is suppressed here, in the single place every property expression funnels
+     * through, rather than replicating Skript's pattern generation.
+     */
+    @SuppressWarnings("removal")
+    public static <E extends Expression<R>, R> void property(Class<E> type, Class<R> returnType,
+                                                             String property, String fromType) {
+        PropertyExpression.register(registry(), type, returnType, property, fromType);
     }
 
     /** Registers an expression with an explicit parse priority (replaces the old {@code ExpressionType}). */

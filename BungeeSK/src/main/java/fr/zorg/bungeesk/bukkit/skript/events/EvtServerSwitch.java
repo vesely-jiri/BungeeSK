@@ -7,6 +7,7 @@ import fr.zorg.bungeesk.bukkit.skript.events.bukkit.ServerSwitchEvent;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 
+@SuppressWarnings("removal") // deprecated EventValues.registerEventValue is the only modifiable event-value API Skript 2.16 exposes to addons
 public class EvtServerSwitch {
 
     static {

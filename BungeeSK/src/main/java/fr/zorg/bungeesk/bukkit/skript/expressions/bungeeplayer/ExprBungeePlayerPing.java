@@ -6,6 +6,7 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.utils.CompletableFutureUtils;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 import fr.zorg.bungeesk.common.packets.GetBungeePlayerPingPacket;
@@ -19,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprBungeePlayerPing extends SimplePropertyExpression<BungeePlayer, Long> {
 
     static {
-        register(ExprBungeePlayerPing.class,
+        Syntax.property(ExprBungeePlayerPing.class,
                 Long.class,
                 "[bungee] ping",
                 "bungeeplayer");

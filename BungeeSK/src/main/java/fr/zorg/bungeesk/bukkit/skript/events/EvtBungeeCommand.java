@@ -6,6 +6,10 @@ import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeeCommandEvent;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 
+// EventValues.registerEventValue is deprecated for removal, but Skript 2.16 exposes only a read-only
+// EventValueRegistry to addons (registering throws UnsupportedOperationException) — the deprecated
+// call is the sole working way to register event-values, so the warning is suppressed here.
+@SuppressWarnings("removal")
 public class EvtBungeeCommand {
 
     static {

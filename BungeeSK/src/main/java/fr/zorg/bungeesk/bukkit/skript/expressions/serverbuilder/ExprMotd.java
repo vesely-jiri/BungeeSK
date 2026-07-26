@@ -7,6 +7,7 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import ch.njol.util.coll.CollectionUtils;
+import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.common.entities.BungeeServerBuilder;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExprMotd extends SimplePropertyExpression<BungeeServerBuilder, String> {
 
     static {
-        register(ExprMotd.class,
+        Syntax.property(ExprMotd.class,
                 String.class,
                 "motd",
                 "serverbuilder");

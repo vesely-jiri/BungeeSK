@@ -29,6 +29,10 @@ public class BungeeSK extends JavaPlugin implements Listener {
     private static SyntaxRegistry syntaxRegistry;
     private Metrics metrics;
 
+    // Skript.registerAddon(JavaPlugin) + ch.njol.skript.SkriptAddon are deprecated for removal, but the
+    // modern org.skriptlang.skript.addon.SkriptAddon has no loadClasses(...) — which is how every syntax
+    // class here gets loaded and self-registered — so the classic addon is the only workable path.
+    @SuppressWarnings("removal")
     @Override
     public void onEnable() {
         final long startTime = System.currentTimeMillis();

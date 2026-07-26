@@ -6,6 +6,7 @@ import fr.zorg.bungeesk.bukkit.skript.Syntax;
 import fr.zorg.bungeesk.bukkit.skript.events.bukkit.BungeePlayerJoinEvent;
 import fr.zorg.bungeesk.common.entities.BungeePlayer;
 
+@SuppressWarnings("removal") // deprecated EventValues.registerEventValue is the only modifiable event-value API Skript 2.16 exposes to addons
 public class EvtBungeePlayerJoin {
 
     static {
