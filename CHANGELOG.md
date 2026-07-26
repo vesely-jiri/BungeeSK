@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+- **No more spurious "Lost the connection to the proxy" reconnect churn.** The proxy disconnected a game server after a *single* missed keep-alive (a 1-second round-trip every 5s), so one GC pause or a momentary network/TPS hiccup — on either end — dropped the link and forced a reconnect, often on several servers at once. The proxy now only disconnects after several consecutive missed keep-alives.
+- **Effects fired during a brief outage are no longer silently lost.** While the link is down, fire-and-forget effects from a game server (messages, titles, action bars, broadcasts, kicks, cross-server commands, sounds, boss bars, global-variable writes) are buffered and replayed once it reconnects. The buffer is bounded and has a short time-to-live, so a command that has been waiting too long is dropped instead of firing long after it made sense. Requests (which already fail fast when offline) and connection-control packets are never buffered.
+
+### Internal
+- Both proxies' request/response map is now a `ConcurrentHashMap` (it was a plain `HashMap` accessed from two threads) and no longer leaks a pending entry when a round-trip times out.
+- `SO_KEEPALIVE` is enabled on the proxy and game-server sockets so an idle link isn't silently reaped by a NAT/conntrack table.
+- Added unit tests for the offline packet buffer (FIFO drain, TTL expiry, overflow eviction).
+
 ## 2.3.0
 
 ### Security

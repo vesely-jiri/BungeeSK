@@ -16,10 +16,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class SocketServer {
+
+    // A single missed keep-alive is usually a GC pause or a momentary network/TPS hiccup, not a dead
+    // link. Only give up (and let the game server reconnect) after several misses in a row.
+    private static final int MAX_MISSED_KEEPALIVES = 3;
 
     private final Socket socket;
     private ObjectOutputStream writer;
@@ -31,11 +36,17 @@ public class SocketServer {
     private boolean encrypting;
     private int minecraftPort;
     private long ping;
+    private int missedKeepAlives = 0;
 
     public SocketServer(Socket socket) {
         this.socket = socket;
         this.encrypting = false;
         this.authenticated = false;
+        // OS-level keep-alive so an idle link isn't silently reaped by a NAT/conntrack table.
+        try {
+            socket.setKeepAlive(true);
+        } catch (SocketException ignored) {
+        }
         this.readThread = new Thread(this::read);
         BungeeSK.getInstance().getProxy().getScheduler().runAsync(BungeeSK.getInstance(), () -> {
             try {
@@ -194,14 +205,14 @@ public class SocketServer {
     public void sendKeepAlive() {
         final long baseTimestamp = System.currentTimeMillis();
         final Object response = FutureUtils.generateFuture(this, new KeepAlivePacket());
-        if (response == null) {
-            this.disconnect();
-            return;
-        }
         if (!(response instanceof Long)) {
-            this.disconnect();
+            // Tolerate transient misses: only disconnect after several in a row (see the constant).
+            this.missedKeepAlives++;
+            if (this.missedKeepAlives >= MAX_MISSED_KEEPALIVES)
+                this.disconnect();
             return;
         }
+        this.missedKeepAlives = 0;
         final long responseTimestamp = (long) response;
         this.ping = responseTimestamp - baseTimestamp;
     }

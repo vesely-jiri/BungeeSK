@@ -2,12 +2,21 @@ package fr.zorg.bungeesk.bukkit.packets;
 
 import fr.zorg.bungeesk.bukkit.BungeeSK;
 import fr.zorg.bungeesk.bukkit.utils.ClientBuilder;
+import fr.zorg.bungeesk.common.net.OfflinePacketQueue;
+import fr.zorg.bungeesk.common.packets.AuthCompletePacket;
+import fr.zorg.bungeesk.common.packets.AuthResponsePacket;
 import fr.zorg.bungeesk.common.packets.BungeeSKPacket;
+import fr.zorg.bungeesk.common.packets.CompletableFuturePacket;
+import fr.zorg.bungeesk.common.packets.CompletableFutureResponsePacket;
+import fr.zorg.bungeesk.common.packets.GlobalScriptsRequestPacket;
+import fr.zorg.bungeesk.common.packets.HandshakePacket;
+import fr.zorg.bungeesk.common.packets.KeepAlivePacket;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +57,17 @@ public class PacketClient {
     // once (not once per attempt) when per-attempt logging is off.
     private static boolean announcedProblem = false;
     private static BukkitTask reconnectTask;
+
+    // While the proxy link is down, fire-and-forget effect packets are buffered here (bounded, with a
+    // short TTL) and replayed once we reconnect, so a brief outage doesn't silently swallow a broadcast
+    // or a cross-server command. Requests (answered synchronously and already failing fast when
+    // offline) and connection-control packets are never queued — see isQueueable().
+    private static final int OFFLINE_QUEUE_MAX = 512;
+    private static final long OFFLINE_QUEUE_TTL_MS = 10_000L;
+    // Delay before replaying the buffer on reconnect: lets the encryption handshake settle on both
+    // ends first, so replayed packets are encrypted consistently with what the proxy now expects.
+    private static final long OFFLINE_QUEUE_FLUSH_DELAY_TICKS = 20L; // ~1s
+    private static final OfflinePacketQueue offlineQueue = new OfflinePacketQueue(OFFLINE_QUEUE_MAX, OFFLINE_QUEUE_TTL_MS);
 
     /**
      * Applies reconnect settings (usually from config.yml). Call once on enable; safe to call again.
@@ -104,6 +124,11 @@ public class PacketClient {
             try {
                 newSocket = new Socket();
                 newSocket.connect(new InetSocketAddress(current.getAddress(), current.getPort()), CONNECT_TIMEOUT_MS);
+                // OS-level keep-alive so an idle link isn't silently reaped by a NAT/conntrack table.
+                try {
+                    newSocket.setKeepAlive(true);
+                } catch (SocketException ignored) {
+                }
             } catch (IOException ex) {
                 announceProblem(current.getAddress(), current.getPort(), "is the proxy online and the port open?");
                 handleDrop();
@@ -152,6 +177,7 @@ public class PacketClient {
             BungeeSK.getInstance().getLogger().info("Reconnected to the proxy.");
         else
             BungeeSK.getInstance().getLogger().info("Connected to the proxy.");
+        flushOfflineQueueLater();
     }
 
     /**
@@ -250,6 +276,8 @@ public class PacketClient {
         cancelReconnectTask();
         state = State.DISCONNECTED;
         announcedProblem = false;
+        // Explicit disconnect: drop anything buffered so it isn't replayed on a later manual connect.
+        offlineQueue.clear();
         final SocketClient current = client;
         client = null;
         socket = null;
@@ -290,8 +318,65 @@ public class PacketClient {
 
     public static void sendPacket(BungeeSKPacket packet) {
         final SocketClient current = client;
-        if (current != null && current.isConnected())
+        if (current != null && current.isConnected()) {
             current.sendPacket(packet);
+            return;
+        }
+        // Offline: buffer replayable effects so a short outage doesn't silently lose them.
+        if (isQueueable(packet)) {
+            final boolean evicted = offlineQueue.offer(packet, System.currentTimeMillis());
+            if (evicted)
+                BungeeSK.getInstance().getLogger().warning(
+                        "Proxy link down: offline buffer full (" + OFFLINE_QUEUE_MAX
+                                + ") — dropping the oldest buffered packet.");
+        }
+    }
+
+    /**
+     * Whether a packet may be buffered while offline and replayed on reconnect. Excludes
+     * connection-control packets (handshake / auth / keep-alive) and request/response packets — a
+     * request is answered synchronously and already fails fast when offline, so replaying a stale one
+     * makes no sense.
+     */
+    private static boolean isQueueable(BungeeSKPacket packet) {
+        return !(packet instanceof CompletableFuturePacket
+                || packet instanceof CompletableFutureResponsePacket
+                || packet instanceof KeepAlivePacket
+                || packet instanceof HandshakePacket
+                || packet instanceof AuthResponsePacket
+                || packet instanceof AuthCompletePacket
+                || packet instanceof GlobalScriptsRequestPacket);
+    }
+
+    /**
+     * Schedules a delayed replay of the offline buffer after (re)connecting. The delay lets the
+     * encryption handshake finish on both ends first (see {@link #OFFLINE_QUEUE_FLUSH_DELAY_TICKS}).
+     */
+    private static void flushOfflineQueueLater() {
+        if (offlineQueue.size() == 0)
+            return;
+        try {
+            BungeeSK.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(
+                    BungeeSK.getInstance(),
+                    PacketClient::flushOfflineQueue,
+                    OFFLINE_QUEUE_FLUSH_DELAY_TICKS);
+        } catch (IllegalStateException ex) {
+            // Scheduler unavailable (plugin disabling) — leave the buffer for next time.
+        }
+    }
+
+    private static void flushOfflineQueue() {
+        final SocketClient current = client;
+        if (current == null || !current.isConnected())
+            return; // dropped again before we could flush; keep the buffer for the next connect
+        final OfflinePacketQueue.Drain drain = offlineQueue.drainFresh(System.currentTimeMillis());
+        for (BungeeSKPacket packet : drain.fresh)
+            current.sendPacket(packet);
+        if (!drain.fresh.isEmpty())
+            BungeeSK.getInstance().getLogger().info(
+                    "Replayed " + drain.fresh.size() + " buffered packet(s) after reconnecting"
+                            + (drain.staleDropped > 0
+                            ? " (" + drain.staleDropped + " dropped as too old)." : "."));
     }
 
     private static void closeQuietly(Socket socket) {

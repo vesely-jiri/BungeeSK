@@ -8,10 +8,10 @@ import fr.zorg.velocitysk.BungeeSK;
 import fr.zorg.velocitysk.packets.PacketServer;
 import fr.zorg.velocitysk.packets.SocketServer;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -35,7 +35,9 @@ public class FutureUtils {
         });
     }
 
-    private static final Map<UUID, CompletableFuture<Object>> futures = new HashMap<>();
+    // Concurrent: generateFuture() runs on a scheduler thread while completeFuture() runs on the
+    // socket-reader thread. A plain HashMap could corrupt or lose a completion under that access.
+    private static final Map<UUID, CompletableFuture<Object>> futures = new ConcurrentHashMap<>();
 
     public static Object generateFuture(SocketServer server, BungeeSKPacket packet) {
 
@@ -53,16 +55,17 @@ public class FutureUtils {
         try {
             response = future.get(1, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+        } finally {
+            futures.remove(randomUUID); // never leak the entry, even on timeout
         }
 
         return response;
     }
 
     public static void completeFuture(UUID uuid, Object response) {
-        if (futures.containsKey(uuid)) {
-            futures.get(uuid).complete(response);
-            futures.remove(uuid);
-        }
+        final CompletableFuture<Object> future = futures.remove(uuid);
+        if (future != null)
+            future.complete(response);
     }
 
 
