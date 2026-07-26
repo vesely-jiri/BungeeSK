@@ -67,6 +67,7 @@ jobs:
   # migration — a regression a compile check can't see. Runs independently (does not gate the release).
   syntax-tests:
     name: Skript syntax tests
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -79,14 +80,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+      # Reuse the jar the build job already produced (the actual shipped universal jar) instead of
+      # rebuilding it here.
+      - name: Download the built jar
+        uses: actions/download-artifact@v8
+        with:
+          name: BungeeSK
+          path: dist
 
-      - name: Build plugin jar
-        run: ./gradlew :BungeeSK:shadowJar --stacktrace
+      - name: Cache server jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/bungeesk-integration
+          key: bungeesk-it-jars-velocity3.5.1-paper1.21.11-skript2.16.0
 
       - name: Run Skript syntax tests
-        run: bash scripts/run-syntax-tests.sh
+        run: bash scripts/run-syntax-tests.sh dist/BungeeSK.jar
 
   # Boots a real Velocity proxy + Paper game server (both running the built jar), actually connected
   # over BungeeSK's socket, and checks the connection-dependent behaviour a single-server boot can't:
@@ -94,6 +103,7 @@ jobs:
   # connection-stability fixes. Independent (does not gate the release); heavier, so its own job.
   integration-tests:
     name: Two-server integration test
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -106,11 +116,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Build universal jar
-        run: ./gradlew universalJar --stacktrace
+      - name: Download the built jar
+        uses: actions/download-artifact@v8
+        with:
+          name: BungeeSK
+          path: dist
 
       # Cache the Velocity/Paper/Skript jars the script downloads so reruns don't refetch ~120 MB.
       - name: Cache server jars
@@ -120,7 +130,7 @@ jobs:
           key: bungeesk-it-jars-velocity3.5.1-paper1.21.11-skript2.16.0
 
       - name: Run two-server integration test
-        run: bash scripts/integration-test.sh build/libs/BungeeSK.jar
+        run: bash scripts/integration-test.sh dist/BungeeSK.jar
 
   # Publishes a GitHub Release with the built jars whenever a v* tag is pushed.
   release:

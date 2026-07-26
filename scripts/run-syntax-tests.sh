@@ -33,18 +33,24 @@ echo "==> Staging server in $WORKDIR (MC $MC_VERSION, Skript $SKRIPT_VERSION)"
 cp "$BUNGEESK_JAR" "$WORKDIR/plugins/BungeeSK.jar"
 cp "$TEST_SCRIPT" "$WORKDIR/plugins/Skript/scripts/syntaxes.sk"
 
-# Skript — the same artifact the build compiles against (Maven layout on repo.skriptlang.org).
-curl -fsSL -o "$WORKDIR/plugins/Skript.jar" \
+# Cache the (large) server jars between runs, sharing the same cache as the integration test (same
+# Paper/Skript versions). Paper is resolved from the v3 "fill" API (v2 is gone / HTTP 410); the builds
+# array is newest-first and each server jar URL embeds "paper-<version>", so no jq is needed.
+CACHE="${INTEGRATION_CACHE:-$HOME/.cache/bungeesk-integration}"
+mkdir -p "$CACHE"
+UA="BungeeSK-syntax-tests"
+PAP="$CACHE/paper-$MC_VERSION.jar"
+SKR="$CACHE/skript-$SKRIPT_VERSION.jar"
+[ -f "$SKR" ] || curl -fsSL -o "$SKR" \
   "https://repo.skriptlang.org/releases/com/github/SkriptLang/Skript/${SKRIPT_VERSION}/Skript-${SKRIPT_VERSION}.jar"
-
-# Paper — latest build for the target Minecraft version, via the v3 "fill" API (v2 is gone / HTTP 410).
-# The endpoint returns builds newest-first; [0] is the latest and carries a direct download URL.
-PAPER_UA="BungeeSK-syntax-tests (+https://github.com/vesely-jiri/BungeeSK)"
-PAPER_URL="$(curl -fsSL -H "User-Agent: $PAPER_UA" \
-  "https://fill.papermc.io/v3/projects/paper/versions/${MC_VERSION}/builds" \
-  | jq -r '.[0].downloads."server:default".url')"
-[ -n "$PAPER_URL" ] && [ "$PAPER_URL" != "null" ] || { echo "Could not resolve a Paper build for $MC_VERSION"; exit 2; }
-curl -fsSL -H "User-Agent: $PAPER_UA" -o "$WORKDIR/paper.jar" "$PAPER_URL"
+if [ ! -f "$PAP" ]; then
+  purl="$(curl -fsSL -H "User-Agent: $UA" "https://fill.papermc.io/v3/projects/paper/versions/${MC_VERSION}/builds" \
+        | grep -oE "https://[^\"]*paper-$MC_VERSION[^\"]*\.jar" | head -1)"
+  [ -n "$purl" ] || { echo "Could not resolve a Paper build for $MC_VERSION"; exit 2; }
+  curl -fsSL -H "User-Agent: $UA" -o "$PAP" "$purl"
+fi
+cp "$SKR" "$WORKDIR/plugins/Skript.jar"
+cp "$PAP" "$WORKDIR/paper.jar"
 
 echo "eula=true" > "$WORKDIR/eula.txt"
 printf 'online-mode=false\nlevel-type=flat\nmax-players=1\nspawn-protection=0\n' > "$WORKDIR/server.properties"
