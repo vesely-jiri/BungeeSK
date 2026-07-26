@@ -1,0 +1,78 @@
+# BungeeSK syntax registration / parse test.
+#
+# Loaded by a headless Paper server with Skript (see scripts/run-syntax-tests.sh + the CI job). If any
+# BungeeSK syntax fails to register or a pattern stops parsing, Skript logs "Can't understand ..." for
+# the offending line and the runner fails the build. This is exactly what guards the SyntaxRegistry
+# migration: every effect / expression / condition / section / event is exercised here.
+#
+# The `on <event>` handlers give parse coverage for every BungeeSK event and its event-values. The
+# `on script load` block references the connection-independent syntaxes directly and parse-covers the
+# proxy-dependent ones under an `if client is connected` guard (never true on the test server, so
+# nothing that needs a live proxy actually runs — it only has to parse).
+
+on bungee player join:
+	set {_p} to event-bungeeplayer
+
+on bungee player leave:
+	set {_p} to event-bungeeplayer
+	set {_from} to past-server
+
+on server switch:
+	set {_p} to event-bungeeplayer
+	set {_from} to past-server
+
+on bungee server start:
+	set {_s} to event-bungeeserver
+
+on bungee server stop:
+	set {_s} to event-bungeeserver
+
+on bungee command:
+	set {_p} to event-bungeeplayer
+	set {_cmd} to event-string
+
+on bungee message receive:
+	set {_s} to event-bungeeserver
+	set {_msg} to event-string
+
+on proxy ping:
+	set {_x} to 1
+
+on bungee client connect:
+	set {_x} to 1
+
+on bungee client disconnect:
+	set {_x} to 1
+
+on global script receive:
+	set {_name} to event-string
+
+on bungee custom request:
+	set {_name} to event-string
+	set {_from} to event-bungeeserver
+
+on script load:
+	# Connection-independent syntaxes — safe to evaluate on the test server (client is disconnected).
+	set {_state} to bungee connection state
+	if client is not connected:
+		set {_ok} to true
+
+	# Parse coverage for the proxy-dependent syntaxes. The guard is never true here, so these only
+	# have to parse (register with valid patterns); they never run without a live proxy.
+	if client is connected:
+		send bungee message "hi" to bungee player named "Notch"
+		send bungee title "a" with subtitle "b" for 3 seconds to bungee player named "Notch" with fade-in 10 ticks and fade-out 2 seconds
+		send bungee player named "Notch" action bar "a"
+		kick bungee player named "Notch" from bungeecord
+		send bungee player named "Notch" to bungee server named "lobby"
+		make bungee player named "Notch" execute command "spawn"
+		broadcast "hello" to the network
+		broadcast title "a" to the network
+		broadcast action bar "a" to the network
+		play sound "entity.experience_orb.pickup" to bungee player named "Notch"
+		set {_count} to network player count
+		set {_serverCount} to player count of bungee server named "lobby"
+		set {_players::*} to all bungee players
+		set {_servers::*} to all bungee servers
+		reconnect to the proxy
+		disconnect the client

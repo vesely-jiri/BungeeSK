@@ -62,6 +62,32 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  # Boots a throwaway Paper server with Skript + the built jar and loads a script that exercises every
+  # BungeeSK syntax; fails if any syntax no longer registers or parses. Guards the SyntaxRegistry
+  # migration — a regression a compile check can't see. Runs independently (does not gate the release).
+  syntax-tests:
+    name: Skript syntax tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build plugin jar
+        run: ./gradlew :BungeeSK:shadowJar --stacktrace
+
+      - name: Run Skript syntax tests
+        run: bash scripts/run-syntax-tests.sh
+
   # Publishes a GitHub Release with the built jars whenever a v* tag is pushed.
   release:
     name: Release

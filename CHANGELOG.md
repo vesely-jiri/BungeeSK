@@ -11,6 +11,7 @@
 - `SO_KEEPALIVE` is enabled on the proxy and game-server sockets so an idle link isn't silently reaped by a NAT/conntrack table.
 - Added unit tests for the offline packet buffer (FIFO drain, TTL expiry, overflow eviction).
 - Migrated all Skript syntax registration off the deprecated (marked-for-removal) `Skript.registerEffect/registerExpression/registerCondition/registerSection/registerEvent` + `ExpressionType` APIs to the modern `SyntaxRegistry`, via a single `Syntax` helper. Also replaced the deprecated `Timespan.getTicks_i()`/`getTicks()` with `getAs(TimePeriod.TICK)`. No behaviour change; clears those build warnings.
+- Added a Skript syntax test (`BungeeSK/src/test/skript/tests/syntaxes.sk` + `scripts/run-syntax-tests.sh` + a CI job): boots a throwaway Paper server with Skript and the built jar and loads a script exercising every effect/expression/condition/section/event, failing if any no longer registers or parses. Verified locally on Paper 1.21.11 + Skript 2.16.0 ("all scripts loaded without errors").
 
 ## 2.3.0
 
