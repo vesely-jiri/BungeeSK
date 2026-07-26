@@ -187,9 +187,17 @@ public class BungeeSK extends JavaPlugin implements Listener {
     }
 
     public static void callEvent(Event event) {
-        getInstance().getServer().getScheduler().runTask(getInstance(), () -> {
-            getInstance().getServer().getPluginManager().callEvent(event);
-        });
+        final BungeeSK plugin = getInstance();
+        final var server = plugin.getServer();
+        // On the main thread (e.g. onDisable -> PacketClient.stop -> SocketClient.disconnect fires
+        // ClientDisconnectEvent) call the event directly: scheduling a task once the plugin is disabling
+        // throws IllegalPluginAccessException. Off the main thread (the async socket reader) hop to the
+        // main thread, but only while still enabled — during shutdown drop the event rather than crash.
+        if (server.isPrimaryThread()) {
+            server.getPluginManager().callEvent(event);
+        } else if (plugin.isEnabled()) {
+            server.getScheduler().runTask(plugin, () -> server.getPluginManager().callEvent(event));
+        }
     }
 
     public static int getMinecraftPort() {
