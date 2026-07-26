@@ -1,0 +1,6 @@
+# Shell scripts must stay LF or they break when run on the Linux CI runner
+# (a CRLF shebang gives "/bin/bash^M: bad interpreter").
+*.sh text eol=lf
+
+# Skript test scripts: keep LF for consistent parsing across platforms.
+*.sk text eol=lf
