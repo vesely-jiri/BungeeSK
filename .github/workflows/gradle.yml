@@ -88,6 +88,40 @@ jobs:
       - name: Run Skript syntax tests
         run: bash scripts/run-syntax-tests.sh
 
+  # Boots a real Velocity proxy + Paper game server (both running the built jar), actually connected
+  # over BungeeSK's socket, and checks the connection-dependent behaviour a single-server boot can't:
+  # auto-connect, a stable link under the keep-alive, and a clean shutdown while connected. Guards the
+  # connection-stability fixes. Independent (does not gate the release); heavier, so its own job.
+  integration-tests:
+    name: Two-server integration test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build universal jar
+        run: ./gradlew universalJar --stacktrace
+
+      # Cache the Velocity/Paper/Skript jars the script downloads so reruns don't refetch ~120 MB.
+      - name: Cache server jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/bungeesk-integration
+          key: bungeesk-it-jars-velocity3.5.1-paper1.21.11-skript2.16.0
+
+      - name: Run two-server integration test
+        run: bash scripts/integration-test.sh build/libs/BungeeSK.jar
+
   # Publishes a GitHub Release with the built jars whenever a v* tag is pushed.
   release:
     name: Release
