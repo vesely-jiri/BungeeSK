@@ -24,7 +24,7 @@ public class EffSendTitle extends Effect {
 
     static {
         Syntax.effect(EffSendTitle.class, EffSendTitle::new,
-                "send [bungee[cord]] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayers% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
+                "send (bungee|proxy) title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayers% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
     }
 
     private Expression<String> title;

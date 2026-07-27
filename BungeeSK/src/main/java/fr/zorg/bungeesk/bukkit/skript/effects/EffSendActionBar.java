@@ -23,7 +23,7 @@ public class EffSendActionBar extends Effect {
 
     static {
         Syntax.effect(EffSendActionBar.class, EffSendActionBar::new,
-                "send [bungee] action bar %string% to %bungeeplayers%");
+                "send (bungee|proxy) action bar %string% to %bungeeplayers%");
     }
 
     private Expression<BungeePlayer> players;

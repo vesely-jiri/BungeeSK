@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class EffSendMessage extends Effect {
 
     static {
-        Syntax.effect(EffSendMessage.class, EffSendMessage::new, "send [bungee] message %string% to %bungeeplayers%");
+        Syntax.effect(EffSendMessage.class, EffSendMessage::new, "send (bungee|proxy) message %string% to %bungeeplayers%");
     }
 
     private Expression<BungeePlayer> players;

@@ -28,7 +28,7 @@ public class EffShowBossBar extends Effect {
 
     static {
         Syntax.effect(EffShowBossBar.class, EffShowBossBar::new,
-                "show [bungee] boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayers%");
+                "show [(bungee|proxy)] boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayers%");
     }
 
     private Expression<String> title;

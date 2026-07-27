@@ -99,16 +99,16 @@ broadcast "<rainbow>Welcome to the network!</rainbow>" to the network
 ```applescript
 broadcast "&aHello network!" to the network
 broadcast bungee message "&eServer message" to bungee server named "lobby"
-send message "&6Hi!" to bungee player named "Notch"
-send action bar "&bWelcome!" to {_bungeeplayer}
-send title "&6Title" with subtitle "&7Subtitle" to all bungee players
-send {_bungeeplayer} to bungee server named "hub"
-make {_bungeeplayer} execute command "spawn"
-kick all bungee players from bungeecord due to "&cRestart"
+send bungee message "&6Hi!" to bungee player named "Notch"
+send proxy action bar "&bWelcome!" to {_bungeeplayer}
+send bungee title "&6Title" with subtitle "&7Subtitle" to all bungee players
+connect {_bungeeplayer} to bungee server named "hub"
+make {_bungeeplayer} execute proxy command "glist"
+kick all bungee players from the network due to "&cRestart"
 send custom message "hello" to {_bungeeservers::*}
 ```
 
-Every player-targeted effect (message, action bar, title, sound, boss bar, kick, send-to-server, run command) takes **one player or a list** — e.g. `send action bar "&aGo!" to all bungee players`. `bungee` is optional on the ones that could clash with a built-in Skript effect (`send action bar …` / `send bungee action bar …` both work); add it if Skript grabs the plain form.
+Every player-targeted effect takes **one player, a list, or a variable**. The ones that would otherwise clash with a built-in Skript effect — `send (bungee|proxy) message`, `send (bungee|proxy) action bar`, `send (bungee|proxy) title`, `play (bungee|proxy) sound` — **require** a `bungee` **or** `proxy` keyword (interchangeable, since the addon also drives Velocity). That keyword is what lets a **variable** recipient still resolve to BungeeSK instead of Skript's own effect. The rest read plainly: `kick … from the network`, `connect … to <server>`, `make … execute proxy command …`.
 
 See the full documentation on [SkriptHub](https://skripthub.net/docs/?addon=BungeeSK) and [skUnity](https://docs.skunity.com/syntax/search/addon:bungeesk).
 

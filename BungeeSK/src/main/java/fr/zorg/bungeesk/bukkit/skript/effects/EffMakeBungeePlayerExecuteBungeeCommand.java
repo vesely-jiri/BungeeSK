@@ -23,7 +23,7 @@ public class EffMakeBungeePlayerExecuteBungeeCommand extends Effect {
 
     static {
         Syntax.effect(EffMakeBungeePlayerExecuteBungeeCommand.class, EffMakeBungeePlayerExecuteBungeeCommand::new,
-                "make %bungeeplayers% execute bungee command %string%");
+                "make %bungeeplayers% execute (bungee|proxy) command %string%");
     }
 
     private Expression<BungeePlayer> players;

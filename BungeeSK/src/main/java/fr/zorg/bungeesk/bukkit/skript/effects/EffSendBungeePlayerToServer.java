@@ -25,7 +25,7 @@ public class EffSendBungeePlayerToServer extends Effect {
 
     static {
         Syntax.effect(EffSendBungeePlayerToServer.class, EffSendBungeePlayerToServer::new,
-                "send %bungeeplayers% to %bungeeserver%");
+                "(send|connect) %bungeeplayers% to %bungeeserver%");
     }
 
     private Expression<BungeePlayer> players;

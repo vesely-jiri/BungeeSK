@@ -23,7 +23,7 @@ public class EffKickBungeePlayer extends Effect {
 
     static {
         Syntax.effect(EffKickBungeePlayer.class, EffKickBungeePlayer::new,
-                "kick %bungeeplayers% from bungee[cord] [(due to|because of) %-string%]");
+                "kick %bungeeplayers% from (bungee[cord]|proxy|[the] network) [(due to|because of) %-string%]");
     }
 
     private Expression<BungeePlayer> players;

@@ -5,15 +5,17 @@
 > **Requires Skript 2.16.0 or newer.** The syntax-registration migration below is built against the Skript 2.16 API (`SyntaxInfo.simple` / `SyntaxRegistry`); on older Skript (2.15.x and earlier) BungeeSK will **not** enable — it throws `NoSuchMethodError: SyntaxInfo.simple` on start and registers no syntax. Update Skript before updating BungeeSK.
 
 ### Breaking changes
-- **Player-targeted effect syntax redesigned — old forms removed, update your scripts.** These effects now read naturally and take **one player or a list**:
-  - `send [bungee] message "…" to <players>` (was `send bungee message "…" to <player>`)
-  - `send [bungee] action bar "…" to <players>` (was `send <player> action bar [message] "…"`)
-  - `send [bungee[cord]] title "…" [with subtitle …] [for …] to <players> [with fade-in …] [and fade-out …]` (was `send bungeecord title … to <player>`)
-  - `play [bungee] sound "…" [with volume …] [and pitch …] to <players>`
-  - `show [bungee] boss bar "…" [with colour …] [with style …] [with progress …] [for …] to <players>`
-  - `kick <players> from bungeecord [due to "…"]`, `send <players> to <server>`, `make <players> execute [bungee] command "…"`
+- **Player-targeted effect syntax redesigned — old forms removed, update your scripts.** These effects now take **one player, a list, or a variable**. The ones that would otherwise be shadowed by a built-in Skript effect **require** a `bungee` **or** `proxy` keyword (interchangeable — the addon drives Velocity too, not only BungeeCord):
+  - `send (bungee|proxy) message "…" to <players>`
+  - `send (bungee|proxy) action bar "…" to <players>`
+  - `send (bungee|proxy) title "…" [with subtitle …] [for …] to <players> [with fade-in …] [and fade-out …]`
+  - `(play|send) (bungee|proxy) sound "…" [with volume …] [and pitch …] to <players>`
+  - `show [(bungee|proxy)] boss bar "…" [with colour …] [with style …] [with progress …] [for …] to <players>`
+  - `kick <players> from (bungee|proxy|the network) [due to "…"]`
+  - `connect <players> to <server>` (also `send <players> to <server>`)
+  - `make <players> execute command "…"` (runs on their server) and `make <players> execute (bungee|proxy) command "…"` (a proxy command)
 
-  On the effects that could clash with a built-in Skript effect (`send message` / `send action bar` / `send title`), `bungee` is optional — `send action bar "…" to <players>` and `send bungee action bar "…" to <players>` both work; add `bungee` if Skript grabs the plain form.
+  The `bungee`/`proxy` keyword is required precisely so a **variable** recipient — `send bungee action bar "…" to {_p}` — resolves to BungeeSK; without it Skript's own `send action bar` / `title` / `sound` effect matches the variable first and silently wins.
 - **Proxy command alias renamed** `/bsproxy` → `/bskproxy` (the main command `/bungeeskproxy` is unchanged).
 
 ### Fixes

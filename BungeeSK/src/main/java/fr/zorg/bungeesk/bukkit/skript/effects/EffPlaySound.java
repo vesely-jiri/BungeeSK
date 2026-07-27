@@ -25,7 +25,7 @@ public class EffPlaySound extends Effect {
 
     static {
         Syntax.effect(EffPlaySound.class, EffPlaySound::new,
-                "(play|send) [bungee] sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayers%");
+                "(play|send) (bungee|proxy) sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayers%");
     }
 
     private Expression<String> sound;
