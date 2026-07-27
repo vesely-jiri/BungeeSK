@@ -23,31 +23,33 @@ public class EffSendActionBar extends Effect {
 
     static {
         Syntax.effect(EffSendActionBar.class, EffSendActionBar::new,
-                "send %bungeeplayer% action bar [message] %string%");
+                "send [bungee] action bar %string% to %bungeeplayers%");
     }
 
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<String> message;
 
     @Override
     public boolean init(Expression<?>[] exprs, int pattern, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
-        this.player = (Expression<BungeePlayer>) exprs[0];
-        this.message = (Expression<String>) exprs[1];
+        this.message = (Expression<String>) exprs[0];
+        this.players = (Expression<BungeePlayer>) exprs[1];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        if (this.player.getSingle(e) == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        final String message = this.message.getSingle(e);
+        if (players.length == 0 || message == null)
             return;
 
-        final SendActionBarPacket packet = new SendActionBarPacket(this.player.getSingle(e), this.message.getSingle(e));
-        PacketClient.sendPacket(packet);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new SendActionBarPacket(player, message));
     }
 
     @Override
     public String toString(Event e, boolean debug) {
-        return "send action bar message " + this.message.toString(e, debug) + " to bungee player " + this.player.toString(e, debug);
+        return "send action bar " + this.message.toString(e, debug) + " to " + this.players.toString(e, debug);
     }
 
 }

@@ -28,7 +28,7 @@ public class EffShowBossBar extends Effect {
 
     static {
         Syntax.effect(EffShowBossBar.class, EffShowBossBar::new,
-                "show boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayer%");
+                "show [bungee] boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayers%");
     }
 
     private Expression<String> title;
@@ -36,7 +36,7 @@ public class EffShowBossBar extends Effect {
     private Expression<String> style;
     private Expression<Number> progress;
     private Expression<Timespan> duration;
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -46,15 +46,15 @@ public class EffShowBossBar extends Effect {
         this.style = (Expression<String>) exprs[2];
         this.progress = (Expression<Number>) exprs[3];
         this.duration = (Expression<Timespan>) exprs[4];
-        this.player = (Expression<BungeePlayer>) exprs[5];
+        this.players = (Expression<BungeePlayer>) exprs[5];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        final BungeePlayer bungeePlayer = this.player.getSingle(e);
+        final BungeePlayer[] players = this.players.getArray(e);
         final String title = this.title.getSingle(e);
-        if (bungeePlayer == null || title == null)
+        if (players.length == 0 || title == null)
             return;
 
         final String color = this.color == null ? null : this.color.getSingle(e);
@@ -74,12 +74,13 @@ public class EffShowBossBar extends Effect {
                 durationTicks = timespan.getAs(Timespan.TimePeriod.TICK);
         }
 
-        PacketClient.sendPacket(new ShowBossBarPacket(bungeePlayer, title, color, style, progress, durationTicks));
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new ShowBossBarPacket(player, title, color, style, progress, durationTicks));
     }
 
     @Override
     public String toString(Event e, boolean debug) {
-        return "show boss bar " + this.title.toString(e, debug) + " to " + this.player.toString(e, debug);
+        return "show boss bar " + this.title.toString(e, debug) + " to " + this.players.toString(e, debug);
     }
 
 }

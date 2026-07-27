@@ -23,27 +23,29 @@ import org.jetbrains.annotations.Nullable;
 public class EffSendMessage extends Effect {
 
     static {
-        Syntax.effect(EffSendMessage.class, EffSendMessage::new, "send bungee message %string% to %bungeeplayer%");
+        Syntax.effect(EffSendMessage.class, EffSendMessage::new, "send [bungee] message %string% to %bungeeplayers%");
     }
 
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<String> message;
 
     public boolean init(final Expression<?>[] exprs, final int matchedPattern, final Kleenean isDelayed, final SkriptParser.ParseResult parseResult) {
         this.message = (Expression<String>) exprs[0];
-        this.player = (Expression<BungeePlayer>) exprs[1];
+        this.players = (Expression<BungeePlayer>) exprs[1];
         return true;
     }
 
     protected void execute(final Event e) {
-        if (this.player.getSingle(e) == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        final String message = this.message.getSingle(e);
+        if (players.length == 0 || message == null)
             return;
-        final SendMessagePacket packet = new SendMessagePacket(this.player.getSingle(e), this.message.getSingle(e));
-        PacketClient.sendPacket(packet);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new SendMessagePacket(player, message));
     }
 
     public String toString(@Nullable Event e, boolean debug) {
-        return "send bungee message " + message.toString(e, debug) + " to " + player.toString(e, debug);
+        return "send bungee message " + message.toString(e, debug) + " to " + players.toString(e, debug);
     }
 
 }

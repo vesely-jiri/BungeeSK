@@ -60,16 +60,21 @@ on script load:
 	# Parse coverage for the proxy-dependent syntaxes. The guard is never true here, so these only
 	# have to parse (register with valid patterns); they never run without a live proxy.
 	if client is connected:
-		send bungee message "hi" to bungee player named "Notch"
-		send bungee title "a" with subtitle "b" for 3 seconds to bungee player named "Notch" with fade-in 10 ticks and fade-out 2 seconds
-		send bungee player named "Notch" action bar "a"
-		kick bungee player named "Notch" from bungeecord
+		# Player-targeted effects — natural form (optional "bungee"), single player AND a list.
+		send message "hi" to bungee player named "Notch"
+		send bungee message "hi" to all bungee players
+		send action bar "a" to bungee player named "Notch"
+		send bungee action bar "a" to all bungee players
+		send title "a" with subtitle "b" for 3 seconds to bungee player named "Notch" with fade-in 10 ticks and fade-out 2 seconds
+		kick all bungee players from bungeecord due to "bye"
 		send bungee player named "Notch" to bungee server named "lobby"
-		make bungee player named "Notch" execute command "spawn"
+		make all bungee players execute command "spawn"
+		make bungee player named "Notch" execute bungee command "glist"
+		play bungee sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to all bungee players
+		show bungee boss bar "hi" with colour "green" for 5 seconds to bungee player named "Notch"
 		broadcast "hello" to the network
 		broadcast title "a" to the network
 		broadcast action bar "a" to the network
-		play sound "entity.experience_orb.pickup" to bungee player named "Notch"
 		set {_count} to network player count
 		set {_serverCount} to player count of bungee server named "lobby"
 		set {_players::*} to all bungee players

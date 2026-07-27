@@ -1,5 +1,20 @@
 # Troubleshooting
 
+## BungeeSK won't enable / every BungeeSK syntax says "Can't understand"
+
+Symptom — on startup the server logs:
+
+```
+Error occurred while enabling BungeeSK vX (Is it up to date?)
+java.lang.NoSuchMethodError: '… SyntaxInfo.simple(…)'
+```
+
+and afterwards **every** BungeeSK line in your scripts reports *Can't understand this structure* / *Can't understand this expression*.
+
+**Cause:** your **Skript is older than 2.16.0**. BungeeSK 2.3.x is built against the Skript 2.16 API (`SyntaxInfo.simple`, the modern `SyntaxRegistry`), which does not exist in 2.15.x and earlier, so BungeeSK crashes during enable and registers no syntax at all — which is why *all* of its syntaxes then fail to parse, not just some.
+
+**Fix:** update [Skript](https://github.com/SkriptLang/Skript/releases/latest) to **2.16.0 or newer** and restart. Check the running version with `/skript info` (or `/sk info`).
+
 ## The game server never connects
 
 - **Port / password mismatch.** The `port` and `password` must be **identical** on the proxy and every game server. A wrong password fails the handshake.

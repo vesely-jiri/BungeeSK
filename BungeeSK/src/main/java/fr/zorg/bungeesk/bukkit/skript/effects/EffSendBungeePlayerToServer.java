@@ -25,31 +25,33 @@ public class EffSendBungeePlayerToServer extends Effect {
 
     static {
         Syntax.effect(EffSendBungeePlayerToServer.class, EffSendBungeePlayerToServer::new,
-                "send %bungeeplayer% to %bungeeserver%");
+                "send %bungeeplayers% to %bungeeserver%");
     }
 
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<BungeeServer> server;
 
     @Override
     public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, SkriptParser.ParseResult parseResult) {
-        this.player = (Expression<BungeePlayer>) exprs[0];
+        this.players = (Expression<BungeePlayer>) exprs[0];
         this.server = (Expression<BungeeServer>) exprs[1];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        if (this.player.getSingle(e) == null || this.server.getSingle(e) == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        final BungeeServer server = this.server.getSingle(e);
+        if (players.length == 0 || server == null)
             return;
 
-        final SendBungeePlayerToServerPacket packet = new SendBungeePlayerToServerPacket(this.player.getSingle(e), this.server.getSingle(e));
-        PacketClient.sendPacket(packet);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new SendBungeePlayerToServerPacket(player, server));
     }
 
     @Override
     public String toString(@Nullable Event e, boolean debug) {
-        return "send bungee player " + player.toString(e, debug) + " to server " + server.toString(e, debug);
+        return "send " + players.toString(e, debug) + " to server " + server.toString(e, debug);
     }
 
 }

@@ -15,9 +15,11 @@
 | Component        | Supported                                                                 |
 |------------------|---------------------------------------------------------------------------|
 | Game servers     | **Paper / Spigot 1.21.11** (built against `paper-api`). Forward-compatible with the 26.x line as long as Skript itself supports it. |
-| Skript           | **2.16.0+** (required for 1.21.x)                                          |
+| Skript           | **2.16.0 or newer — required.** Built against the Skript 2.16 API; on older Skript (2.15.x and earlier) BungeeSK **will not enable** (`NoSuchMethodError: SyntaxInfo.simple` on start) and no syntax registers. |
 | Java             | **21** (required by Minecraft 1.21+)                                       |
 | Proxies          | **BungeeCord / Waterfall** and **Velocity 3.4+**                          |
+
+> **Skript 2.16.0 is a hard minimum, not a suggestion.** If startup logs `Error occurred while enabling BungeeSK … NoSuchMethodError: SyntaxInfo.simple` and afterwards every BungeeSK line in your scripts says *Can't understand this structure/expression*, your Skript is older than 2.16.0 — update it. See [Troubleshooting](https://github.com/vesely-jiri/BungeeSK/wiki/Troubleshooting).
 
 > **26.1+ note:** BungeeSK uses only stable Bukkit + Skript API (no version-specific NMS), so the same `BungeeSK.jar` is expected to keep working on newer game versions once your Paper build and Skript support them. Run the newest Skript for the newest Minecraft.
 
@@ -73,7 +75,7 @@ Unlike older versions, you **no longer need a manual `while` retry loop** — au
 | Where | Command | Subcommands |
 |-------|---------|-------------|
 | Game server (Paper/Spigot) | `/bungeesk` | `status`, `reconnect`, `disconnect`, `reload`, `version` — controls **this server's** link to the proxy |
-| Proxy (BungeeCord / Velocity) | `/bungeeskproxy` (alias `/bsproxy`) | `servers`, `disconnect <ip:port\|all>`, `start`, `stop`, `restart`, `reload` — manages the **proxy listener** |
+| Proxy (BungeeCord / Velocity) | `/bungeeskproxy` (alias `/bskproxy`) | `servers`, `disconnect <ip:port\|all>`, `start`, `stop`, `restart`, `reload` — manages the **proxy listener** |
 
 Both require the `bungeesk.command` permission. The proxy command is `/bungeeskproxy` (not `/bungeesk`) on purpose: a proxy intercepts a `/bungeesk` it owns and would shadow the game-server `/bungeesk`, leaving that one reachable only as the ugly `/bungeesk:bungeesk`.
 
@@ -97,15 +99,16 @@ broadcast "<rainbow>Welcome to the network!</rainbow>" to the network
 ```applescript
 broadcast "&aHello network!" to the network
 broadcast bungee message "&eServer message" to bungee server named "lobby"
-send %bungeeplayer% action bar message "&bWelcome!"
-send bungeecord title "&6Title" with subtitle "&7Subtitle" to {_bungeeplayer}
-
-set {_players::*} to all bungee players on bungee server named "lobby"
+send message "&6Hi!" to bungee player named "Notch"
+send action bar "&bWelcome!" to {_bungeeplayer}
+send title "&6Title" with subtitle "&7Subtitle" to all bungee players
 send {_bungeeplayer} to bungee server named "hub"
-make all servers execute console command "say hi"
-make %bungeeplayer% execute command "spawn"
+make {_bungeeplayer} execute command "spawn"
+kick all bungee players from bungeecord due to "&cRestart"
 send custom message "hello" to {_bungeeservers::*}
 ```
+
+Every player-targeted effect (message, action bar, title, sound, boss bar, kick, send-to-server, run command) takes **one player or a list** — e.g. `send action bar "&aGo!" to all bungee players`. `bungee` is optional on the ones that could clash with a built-in Skript effect (`send action bar …` / `send bungee action bar …` both work); add it if Skript grabs the plain form.
 
 See the full documentation on [SkriptHub](https://skripthub.net/docs/?addon=BungeeSK) and [skUnity](https://docs.skunity.com/syntax/search/addon:bungeesk).
 

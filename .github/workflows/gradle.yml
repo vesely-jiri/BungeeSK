@@ -61,6 +61,9 @@ jobs:
           path: build/libs/BungeeSK.jar
           if-no-files-found: error
           retention-days: 30
+          # The jar is already a compressed zip; re-deflating it saves ~1 MB but wastes CPU on both
+          # ends. Store it (GitHub still wraps the artifact in a zip container either way).
+          compression-level: 0
 
   # Boots a throwaway Paper server with Skript + the built jar and loads a script that exercises every
   # BungeeSK syntax; fails if any syntax no longer registers or parses. Guards the SyntaxRegistry

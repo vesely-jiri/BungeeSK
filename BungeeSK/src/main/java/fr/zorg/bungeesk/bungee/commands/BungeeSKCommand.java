@@ -30,10 +30,10 @@ public class BungeeSKCommand extends Command implements TabExecutor, Listener {
             "help", "servers", "disconnect", "start", "stop", "restart", "reload");
 
     public BungeeSKCommand() {
-        // Named "bungeeskproxy" (alias "bsproxy") so it does not collide with the game-server-side
+        // Named "bungeeskproxy" (alias "bskproxy") so it does not collide with the game-server-side
         // "/bungeesk" command: on a proxy network the proxy would otherwise intercept "/bungeesk"
         // and shadow the backend command (which would then only be reachable as "/bungeesk:bungeesk").
-        super("bungeeskproxy", null, "bsproxy");
+        super("bungeeskproxy", null, "bskproxy");
     }
 
     @Override
@@ -172,7 +172,7 @@ public class BungeeSKCommand extends Command implements TabExecutor, Listener {
     public void onTabComplete(TabCompleteEvent e) {
         if (((CommandSender) e.getSender()).hasPermission("bungeesk.command"))
             return;
-        e.getSuggestions().removeIf(s -> s.equalsIgnoreCase("bungeeskproxy") || s.equalsIgnoreCase("bsproxy"));
+        e.getSuggestions().removeIf(s -> s.equalsIgnoreCase("bungeeskproxy") || s.equalsIgnoreCase("bskproxy"));
     }
 
 }

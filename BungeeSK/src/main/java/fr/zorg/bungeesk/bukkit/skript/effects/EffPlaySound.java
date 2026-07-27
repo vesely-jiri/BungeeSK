@@ -25,13 +25,13 @@ public class EffPlaySound extends Effect {
 
     static {
         Syntax.effect(EffPlaySound.class, EffPlaySound::new,
-                "(play|send) [bungee] sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayer%");
+                "(play|send) [bungee] sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayers%");
     }
 
     private Expression<String> sound;
     private Expression<Number> volume;
     private Expression<Number> pitch;
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -39,20 +39,21 @@ public class EffPlaySound extends Effect {
         this.sound = (Expression<String>) exprs[0];
         this.volume = (Expression<Number>) exprs[1];
         this.pitch = (Expression<Number>) exprs[2];
-        this.player = (Expression<BungeePlayer>) exprs[3];
+        this.players = (Expression<BungeePlayer>) exprs[3];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        final BungeePlayer bungeePlayer = this.player.getSingle(e);
+        final BungeePlayer[] players = this.players.getArray(e);
         final String sound = this.sound.getSingle(e);
-        if (bungeePlayer == null || sound == null)
+        if (players.length == 0 || sound == null)
             return;
 
         final float volume = number(this.volume, e, 1f);
         final float pitch = number(this.pitch, e, 1f);
-        PacketClient.sendPacket(new PlaySoundPacket(bungeePlayer, sound, volume, pitch));
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new PlaySoundPacket(player, sound, volume, pitch));
     }
 
     private static float number(Expression<Number> expr, Event e, float fallback) {
@@ -64,7 +65,7 @@ public class EffPlaySound extends Effect {
 
     @Override
     public String toString(Event e, boolean debug) {
-        return "play sound " + this.sound.toString(e, debug) + " to " + this.player.toString(e, debug);
+        return "play sound " + this.sound.toString(e, debug) + " to " + this.players.toString(e, debug);
     }
 
 }

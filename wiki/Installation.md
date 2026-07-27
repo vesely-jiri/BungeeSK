@@ -2,8 +2,10 @@
 
 ## Requirements
 
-- **Game servers:** Paper/Spigot **1.21.11** on **Java 21**, with [Skript](https://github.com/SkriptLang/Skript/releases/latest) **2.16+** installed.
+- **Game servers:** Paper/Spigot **1.21.11** on **Java 21**, with [Skript](https://github.com/SkriptLang/Skript/releases/latest) **2.16.0 or newer** installed.
 - **Proxy:** **BungeeCord** (1.21) **or** **Velocity** (3.4+). The proxy does **not** need Skript.
+
+> **Skript 2.16.0 is a hard minimum.** BungeeSK is built against the Skript 2.16 API. On older Skript (e.g. 2.15.x) it fails to enable with `NoSuchMethodError: SyntaxInfo.simple` and registers no syntax — every BungeeSK line then shows *Can't understand this structure/expression*. Updating Skript fixes it. Check the running version with `/skript info`. See **[Troubleshooting](Troubleshooting)**.
 
 ## One jar, everywhere
 

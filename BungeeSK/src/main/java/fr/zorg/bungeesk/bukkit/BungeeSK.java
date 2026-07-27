@@ -2,6 +2,7 @@ package fr.zorg.bungeesk.bukkit;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import ch.njol.skript.util.Version;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import fr.zorg.bungeesk.bukkit.api.BukkitAPI;
 import fr.zorg.bungeesk.bukkit.commands.BungeeSKCommand;
@@ -29,12 +30,16 @@ public class BungeeSK extends JavaPlugin implements Listener {
     private static SyntaxRegistry syntaxRegistry;
     private Metrics metrics;
 
+    private static final Version MIN_SKRIPT_VERSION = new Version(2, 16, 0);
+
     // Skript.registerAddon(JavaPlugin) + ch.njol.skript.SkriptAddon are deprecated for removal, but the
     // modern org.skriptlang.skript.addon.SkriptAddon has no loadClasses(...) — which is how every syntax
     // class here gets loaded and self-registered — so the classic addon is the only workable path.
     @SuppressWarnings("removal")
     @Override
     public void onEnable() {
+        if (!this.isSkriptCompatible())
+            return;
         final long startTime = System.currentTimeMillis();
         executor = Executors.newCachedThreadPool(runnable -> {
             final Thread thread = new Thread(runnable, "BungeeSK-Async");
@@ -67,10 +72,30 @@ public class BungeeSK extends JavaPlugin implements Listener {
             command.setTabCompleter(executor);
         }
 
-        this.setupConnection();
         this.setupPlaceholders();
 
+        // Group A: the enable summary. Print it before opening the connection so the async connection
+        // result (Group B, logged by PacketClient) lands cleanly below it instead of interleaving.
+        BungeeSKConfig.init();
         this.logStartupBanner(System.currentTimeMillis() - startTime);
+        this.setupConnection();
+    }
+
+    /**
+     * BungeeSK 2.3+ registers its syntax through Skript's 2.16 SyntaxRegistry API ({@code
+     * SyntaxInfo.simple}, …), which does not exist in older Skript. On such a version, loading the syntax
+     * classes throws a raw {@code NoSuchMethodError} mid-enable and no syntax registers. Check up front
+     * and disable cleanly with an actionable message instead of the cryptic stack trace.
+     */
+    private boolean isSkriptCompatible() {
+        final Version found = Skript.getVersion();
+        if (found.compareTo(MIN_SKRIPT_VERSION) < 0) {
+            this.getLogger().severe("BungeeSK requires Skript " + MIN_SKRIPT_VERSION + " or newer, but found "
+                    + found + ". Disabling BungeeSK — update Skript.");
+            this.getServer().getPluginManager().disablePlugin(this);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -83,7 +108,6 @@ public class BungeeSK extends JavaPlugin implements Listener {
             return;
         fr.zorg.bungeesk.bukkit.utils.NetworkStats.start();
         new fr.zorg.bungeesk.bukkit.placeholders.BungeeSKExpansion().register();
-        this.getLogger().info("Hooked into PlaceholderAPI (%bungeesk_...%).");
     }
 
     /**
@@ -109,7 +133,9 @@ public class BungeeSK extends JavaPlugin implements Listener {
         console.sendMessage(color(" &8» &7Server:    &f" + Bukkit.getName() + " " + Bukkit.getBukkitVersion()));
         console.sendMessage(color(" &8» &7Skript:    &f" + Skript.getVersion()));
         console.sendMessage(color(" &8» &7Proxy:     &f" + target + (autoConnect ? " &8(&aauto-connect&8)" : " &8(&7manual&8)")));
-        console.sendMessage(color(" &8» &7Reconnect: " + (BungeeSKConfig.RECONNECT$ENABLED.getBoolean() ? "&aenabled" : "&cdisabled")));
+        console.sendMessage(color(" &8» &7Reconnect:    " + (BungeeSKConfig.RECONNECT$ENABLED.getBoolean() ? "&aenabled" : "&cdisabled")));
+        final boolean placeholderApi = this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
+        console.sendMessage(color(" &8» &7Integrations: &f" + (placeholderApi ? "PlaceholderAPI" : "&8none")));
         console.sendMessage(color(" &8» &aEnabled in &f" + ms + "ms"));
         console.sendMessage(color(line));
     }

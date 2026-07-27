@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 #
-# Two-server integration test: a Velocity proxy + a Paper game server, both running the built BungeeSK
+# Two-server integration test: a Velocity proxy + TWO Paper game servers, all running the built BungeeSK
 # jar, actually connected over BungeeSK's socket. This exercises the connection-dependent behaviour a
 # single-server boot (scripts/run-syntax-tests.sh) can't reach:
 #
-#   1. the game server auto-connects to the proxy               ("Connected to the proxy")
-#   2. a real request/response round-trip works over the link   (network player count resolves)
-#   3. the link stays up under the keep-alive                   (no "Lost the connection" while up)
-#   4. a dropped proxy is detected and auto-reconnected          ("Lost the connection" -> "Reconnected")
-#   5. shutting the game server down WHILE CONNECTED is clean    (no IllegalPluginAccessException)
+#   1. both game servers auto-connect to the proxy             ("Connected to the proxy")
+#   2. a real request/response round-trip works over the link  (network player count resolves)
+#   3. the link stays up under the keep-alive                  (no "Lost the connection" while up)
+#   4. a dropped proxy is detected and BOTH auto-reconnect      ("Lost the connection" -> "Reconnected"),
+#      and doing so together does NOT trigger an encryption desync — the bug where the proxy broadcast a
+#      plaintext BungeeServerStartPacket into a peer's auth window and the peer, already encrypting, read
+#      it as a byte[] and threw ("... cannot be cast to [B" / ClassCastException).
+#   5. shutting the game servers down WHILE CONNECTED is clean  (no IllegalPluginAccessException)
 #
 # Usage: scripts/integration-test.sh [path-to-built-universal-BungeeSK-jar]
 #   Defaults to build/libs/BungeeSK.jar (the :universalJar output).
@@ -32,13 +35,18 @@ JAR="${1:-$REPO_ROOT/build/libs/BungeeSK.jar}"
 [ -f "$JAR" ] || { echo "Built universal jar not found: $JAR (run :universalJar first)"; exit 2; }
 
 WORK="$(mktemp -d)"
-PXY="$WORK/proxy"; SRV="$WORK/server"
-PROXY_LOG="$PXY/proxy.log"; GLOG="$SRV/game.log"
-PROXY_FIFO="$PXY/console";  GAME_FIFO="$SRV/console"
-mkdir -p "$PXY/plugins/bungeesk" "$SRV/plugins/BungeeSK" "$SRV/plugins/Skript/scripts"
+PXY="$WORK/proxy"
+PROXY_LOG="$PXY/proxy.log"; PROXY_FIFO="$PXY/console"
+SRV1="$WORK/server1"; SRV2="$WORK/server2"
+GLOG1="$SRV1/game.log"; GLOG2="$SRV2/game.log"
+GAME_FIFO1="$SRV1/console"; GAME_FIFO2="$SRV2/console"
+mkdir -p "$PXY/plugins/bungeesk"
+mkdir -p "$SRV1/plugins/BungeeSK" "$SRV1/plugins/Skript/scripts"
+mkdir -p "$SRV2/plugins/BungeeSK" "$SRV2/plugins/Skript/scripts"
 cleanup() {
-  exec 7>&- 2>/dev/null; exec 8>&- 2>/dev/null
-  pkill -f "$PXY/velocity.jar" 2>/dev/null; pkill -f "$SRV/paper.jar" 2>/dev/null
+  exec 7>&- 2>/dev/null; exec 8>&- 2>/dev/null; exec 9>&- 2>/dev/null
+  pkill -f "$PXY/velocity.jar" 2>/dev/null
+  pkill -f "$SRV1/paper.jar" 2>/dev/null; pkill -f "$SRV2/paper.jar" 2>/dev/null
   rm -rf "$WORK" 2>/dev/null
 }
 trap cleanup EXIT
@@ -80,9 +88,12 @@ VEL="$CACHE/velocity-$VELOCITY_VERSION.jar"; PAP="$CACHE/paper-$MC_VERSION.jar";
 [ -f "$PAP" ] || { echo "==> Downloading Paper $MC_VERSION"; fetch_papermc paper "$MC_VERSION" "$PAP"; }
 [ -f "$SKR" ] || { echo "==> Downloading Skript $SKRIPT_VERSION"; curl -fsSL -o "$SKR" \
   "https://repo.skriptlang.org/releases/com/github/SkriptLang/Skript/${SKRIPT_VERSION}/Skript-${SKRIPT_VERSION}.jar"; }
-cp "$VEL" "$PXY/velocity.jar"; cp "$PAP" "$SRV/paper.jar"; cp "$SKR" "$SRV/plugins/Skript.jar"
+cp "$VEL" "$PXY/velocity.jar"
+cp "$PAP" "$SRV1/paper.jar"; cp "$SKR" "$SRV1/plugins/Skript.jar"
+cp "$PAP" "$SRV2/paper.jar"; cp "$SKR" "$SRV2/plugins/Skript.jar"
 
-# --- proxy: BungeeSK listens on the socket port with a known password ---
+# --- proxy: BungeeSK listens on the socket port with a known password. encrypt: true is REQUIRED to
+#     exercise the reconnect encryption-desync path. ---
 cp "$JAR" "$PXY/plugins/BungeeSK.jar"
 cat > "$PXY/plugins/bungeesk/config.yml" <<YML
 port: 20000
@@ -90,11 +101,12 @@ password: "$PASSWORD"
 encrypt: true
 YML
 
-# --- game server: auto-connect to the proxy + a script that proves a live round-trip ---
-cp "$JAR" "$SRV/plugins/BungeeSK.jar"
-echo "eula=true" > "$SRV/eula.txt"
-printf 'online-mode=false\nlevel-type=flat\nmax-players=1\nserver-port=25566\nspawn-protection=0\n' > "$SRV/server.properties"
-cat > "$SRV/plugins/BungeeSK/config.yml" <<YML
+# --- game server: auto-connect to the proxy ---
+setup_game() { # dir port
+  cp "$JAR" "$1/plugins/BungeeSK.jar"
+  echo "eula=true" > "$1/eula.txt"
+  printf 'online-mode=false\nlevel-type=flat\nmax-players=1\nserver-port=%s\nspawn-protection=0\n' "$2" > "$1/server.properties"
+  cat > "$1/plugins/BungeeSK/config.yml" <<YML
 connection:
   auto-connect: true
   address: "127.0.0.1"
@@ -104,7 +116,11 @@ reconnect:
   enabled: true
   log-attempts: true
 YML
-cat > "$SRV/plugins/Skript/scripts/roundtrip.sk" <<'SK'
+}
+setup_game "$SRV1" 25566
+setup_game "$SRV2" 25567
+# a script that proves a live round-trip (server1 only)
+cat > "$SRV1/plugins/Skript/scripts/roundtrip.sk" <<'SK'
 on script load:
 	wait 12 seconds
 	set {_c} to network player count
@@ -118,51 +134,72 @@ echo "==> Booting proxy"
 boot_proxy
 wait_for "Listening: 20000" "$PROXY_LOG" 60 || { echo "FAIL: proxy never started listening"; tail -n 20 "$PROXY_LOG"; exit 1; }
 
-echo "==> Booting game server"
-rm -f "$GAME_FIFO"; mkfifo "$GAME_FIFO"
-( cd "$SRV" && timeout 300 "$JAVA" -Xmx1500M -jar paper.jar nogui < "$GAME_FIFO" > "$GLOG" 2>&1 ) &
-GAME_JOB=$!
-exec 8> "$GAME_FIFO"
+echo "==> Booting game server 1"
+rm -f "$GAME_FIFO1"; mkfifo "$GAME_FIFO1"
+( cd "$SRV1" && timeout 300 "$JAVA" -Xmx1024M -jar paper.jar nogui < "$GAME_FIFO1" > "$GLOG1" 2>&1 ) &
+GAME_JOB1=$!
+exec 8> "$GAME_FIFO1"
 
-# 1. connect
-if wait_for "Connected to the proxy" "$GLOG" 120; then note "OK: connected to the proxy"; else note "FAIL: never connected to the proxy"; fail=1; fi
+echo "==> Booting game server 2"
+rm -f "$GAME_FIFO2"; mkfifo "$GAME_FIFO2"
+( cd "$SRV2" && timeout 300 "$JAVA" -Xmx1024M -jar paper.jar nogui < "$GAME_FIFO2" > "$GLOG2" 2>&1 ) &
+GAME_JOB2=$!
+exec 9> "$GAME_FIFO2"
+
+# 1. connect (both)
+if wait_for "Connected to the proxy" "$GLOG1" 120; then note "OK: server1 connected to the proxy"; else note "FAIL: server1 never connected"; fail=1; fi
+if wait_for "Connected to the proxy" "$GLOG2" 120; then note "OK: server2 connected to the proxy"; else note "FAIL: server2 never connected"; fail=1; fi
 
 # 2. request/response round-trip over the live link (network player count resolves to a number)
-if wait_for "IT-ROUNDTRIP network-player-count=" "$GLOG" 40; then
-  if grep -qE "IT-ROUNDTRIP network-player-count=[0-9]" "$GLOG"; then note "OK: round-trip resolved (proxy answered)"
+if wait_for "IT-ROUNDTRIP network-player-count=" "$GLOG1" 40; then
+  if grep -qE "IT-ROUNDTRIP network-player-count=[0-9]" "$GLOG1"; then note "OK: round-trip resolved (proxy answered)"
   else note "FAIL: round-trip returned no value (the proxy did not answer)"; fail=1; fi
 else note "FAIL: round-trip line never logged"; fail=1; fi
 
 # 3. stability: hold the link with the proxy up; no spurious keep-alive drop
 sleep "$CONNECTED_SECONDS"
-if grep -q "Lost the connection" "$GLOG"; then note "FAIL: link dropped while the proxy was up (keep-alive regression)"; fail=1
-else note "OK: link stable for ${CONNECTED_SECONDS}s with the proxy up"; fi
+if grep -q "Lost the connection" "$GLOG1" || grep -q "Lost the connection" "$GLOG2"; then note "FAIL: a link dropped while the proxy was up (keep-alive regression)"; fail=1
+else note "OK: both links stable for ${CONNECTED_SECONDS}s with the proxy up"; fi
 
-# 4. reconnect: drop the proxy -> expect detection -> restart it -> expect a reconnect
-note "==> Reconnect test: stopping the proxy"
+# 4. reconnect storm: drop the proxy -> both detect -> restart it -> both reconnect TOGETHER
+note "==> Reconnect test: stopping the proxy (both servers should drop)"
 stop_proxy
-if wait_for "Lost the connection" "$GLOG" 30; then note "OK: game detected the dropped proxy"; else note "FAIL: game never noticed the proxy going away"; fail=1; fi
-note "==> Restarting the proxy"
+if wait_for "Lost the connection" "$GLOG1" 30; then note "OK: server1 detected the dropped proxy"; else note "FAIL: server1 never noticed the proxy going away"; fail=1; fi
+if wait_for "Lost the connection" "$GLOG2" 30; then note "OK: server2 detected the dropped proxy"; else note "FAIL: server2 never noticed the proxy going away"; fail=1; fi
+note "==> Restarting the proxy (both reconnect together)"
 sleep 3   # let the OS release the socket port before the new proxy binds it
 boot_proxy
 wait_for "Listening: 20000" "$PROXY_LOG" 60 || note "WARN: proxy restart was slow"
-if wait_for "Reconnected to the proxy" "$GLOG" 90; then note "OK: game auto-reconnected"; else note "FAIL: game did not reconnect"; fail=1; fi
+if wait_for "Reconnected to the proxy" "$GLOG1" 90; then note "OK: server1 auto-reconnected"; else note "FAIL: server1 did not reconnect"; fail=1; fi
+if wait_for "Reconnected to the proxy" "$GLOG2" 90; then note "OK: server2 auto-reconnected"; else note "FAIL: server2 did not reconnect"; fail=1; fi
+# The two servers' start-broadcasts cross while each is finishing auth — give them a moment, then assert
+# neither game server hit the plaintext-broadcast-in-encrypting-mode ClassCastException.
+sleep 5
+if grep -qE "cannot be cast|ClassCastException" "$GLOG1" "$GLOG2"; then
+  note "FAIL: encryption desync on simultaneous reconnect (plaintext broadcast read as encrypted)"
+  grep -nE "cannot be cast|ClassCastException" "$GLOG1" "$GLOG2" | sed -E 's/\x1b\[[0-9;]*m//g' | head -5
+  fail=1
+else note "OK: no encryption desync across the simultaneous reconnect"; fi
 
-# 5. clean shutdown WHILE connected (the callEvent-during-onDisable fix)
+# 5. clean shutdown WHILE connected (the callEvent-during-onDisable fix), both servers
 note "==> Graceful game-server shutdown while connected"
-echo stop >&8 2>/dev/null || true
-exec 8>&- 2>/dev/null || true
-wait "$GAME_JOB" 2>/dev/null || true
-if grep -qE "IllegalPluginAccessException|register task while disabled" "$GLOG"; then note "FAIL: scheduling during onDisable threw"; fail=1; fi
-grep -q "Disabling BungeeSK" "$GLOG" || { note "FAIL: game server did not shut down cleanly"; fail=1; }
+echo stop >&8 2>/dev/null || true; exec 8>&- 2>/dev/null || true
+echo stop >&9 2>/dev/null || true; exec 9>&- 2>/dev/null || true
+wait "$GAME_JOB1" 2>/dev/null || true
+wait "$GAME_JOB2" 2>/dev/null || true
+if grep -qE "IllegalPluginAccessException|register task while disabled" "$GLOG1" "$GLOG2"; then note "FAIL: scheduling during onDisable threw"; fail=1; fi
+grep -q "Disabling BungeeSK" "$GLOG1" || { note "FAIL: server1 did not shut down cleanly"; fail=1; }
+grep -q "Disabling BungeeSK" "$GLOG2" || { note "FAIL: server2 did not shut down cleanly"; fail=1; }
 stop_proxy
 
-echo "----- game server log (BungeeSK lines) -----"
-grep -iE "Auto-connecting|Connected to the proxy|IT-ROUNDTRIP|Lost the connection|Reconnected|Disabling BungeeSK|IllegalPluginAccess" "$GLOG" | sed -E 's/\x1b\[[0-9;]*m//g' || true
+for tag in "server1:$GLOG1" "server2:$GLOG2"; do
+  echo "----- ${tag%%:*} log (BungeeSK lines) -----"
+  grep -iE "Auto-connecting|Connected to the proxy|IT-ROUNDTRIP|Lost the connection|Reconnected|Disabling BungeeSK|IllegalPluginAccess|cannot be cast|ClassCastException" "${tag#*:}" | sed -E 's/\x1b\[[0-9;]*m//g' || true
+done
 echo "--------------------------------------------"
 
 if [ "$fail" -eq 0 ]; then
-  echo "INTEGRATION TEST PASSED: connect + round-trip + stable + reconnect + clean shutdown."
+  echo "INTEGRATION TEST PASSED: connect + round-trip + stable + simultaneous reconnect (no desync) + clean shutdown."
 else
   echo "INTEGRATION TEST FAILED (see above)."
 fi

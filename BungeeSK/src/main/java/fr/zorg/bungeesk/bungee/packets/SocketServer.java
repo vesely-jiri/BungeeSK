@@ -214,6 +214,11 @@ public class SocketServer {
     }
 
     public void sendKeepAlive() {
+        // The keep-alive task is scheduled at completeChallenge, before this socket finishes
+        // authenticating. Sending before auth would go out plaintext while the client may already be in
+        // encrypting mode; skip until authenticated (and don't count it as a missed keep-alive).
+        if (!this.authenticated)
+            return;
         final long baseTimestamp = System.currentTimeMillis();
         final Object response = FutureUtils.generateFuture(this, new KeepAlivePacket());
         if (!(response instanceof Long)) {

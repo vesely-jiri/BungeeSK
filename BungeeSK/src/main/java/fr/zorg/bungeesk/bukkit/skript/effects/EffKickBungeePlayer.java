@@ -23,31 +23,33 @@ public class EffKickBungeePlayer extends Effect {
 
     static {
         Syntax.effect(EffKickBungeePlayer.class, EffKickBungeePlayer::new,
-                "kick %bungeeplayer% from bungee[cord] [(due to|because of) %-string%]");
+                "kick %bungeeplayers% from bungee[cord] [(due to|because of) %-string%]");
     }
 
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<String> reason;
 
     @Override
     public boolean init(Expression<?>[] exprs, int pattern, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
-        this.player = (Expression<BungeePlayer>) exprs[0];
+        this.players = (Expression<BungeePlayer>) exprs[0];
         this.reason = (Expression<String>) exprs[1];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        final BungeePlayer bungeePlayer = this.player.getSingle(e);
-        if (bungeePlayer == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        if (players.length == 0)
             return;
 
-        PacketClient.sendPacket(new KickBungeePlayerPacket(bungeePlayer, this.reason == null ? null : this.reason.getSingle(e)));
+        final String reason = this.reason == null ? null : this.reason.getSingle(e);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new KickBungeePlayerPacket(player, reason));
     }
 
     @Override
     public String toString(Event event, boolean b) {
-        return "kicks bungee player with uuid " + this.player.toString(event, b);
+        return "kick " + this.players.toString(event, b) + " from bungeecord";
     }
 
 }

@@ -23,31 +23,33 @@ public class EffMakeBungeePlayerExecuteBungeeCommand extends Effect {
 
     static {
         Syntax.effect(EffMakeBungeePlayerExecuteBungeeCommand.class, EffMakeBungeePlayerExecuteBungeeCommand::new,
-                "make %bungeeplayer% execute bungee command %string%");
+                "make %bungeeplayers% execute bungee command %string%");
     }
 
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<String> command;
 
     @Override
     public boolean init(Expression<?>[] exprs, int pattern, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
-        this.player = (Expression<BungeePlayer>) exprs[0];
+        this.players = (Expression<BungeePlayer>) exprs[0];
         this.command = (Expression<String>) exprs[1];
         return true;
     }
 
     @Override
     protected void execute(Event e) {
-        if (this.player.getSingle(e) == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        final String command = this.command.getSingle(e);
+        if (players.length == 0 || command == null)
             return;
 
-        final MakeBungeePlayerBungeeCommandPacket packet = new MakeBungeePlayerBungeeCommandPacket(this.player.getSingle(e), this.command.getSingle(e));
-        PacketClient.sendPacket(packet);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new MakeBungeePlayerBungeeCommandPacket(player, command));
     }
 
     @Override
     public String toString(Event e, boolean debug) {
-        return "make bungee player " + this.player.toString(e, debug) + " execute bungee command " + this.command.toString(e, debug);
+        return "make " + this.players.toString(e, debug) + " execute bungee command " + this.command.toString(e, debug);
     }
 
 }

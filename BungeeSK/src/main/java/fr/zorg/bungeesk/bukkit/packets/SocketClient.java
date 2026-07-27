@@ -66,6 +66,12 @@ public class SocketClient {
                 BungeeSK.runAsync(() -> {
                     Object data = dataAtomic.get();
                     if (this.encrypting) {
+                        if (!(data instanceof byte[])) {
+                            // Encryption desync: the proxy sent a plaintext object while this client is
+                            // already in encrypting mode (e.g. a broadcast that raced the auth handshake).
+                            // Drop it instead of throwing a ClassCastException on the async pool thread.
+                            return;
+                        }
                         data = EncryptionUtils.decryptPacket((byte[]) data, PacketClient.getBuilder().getPassword());
                         if (data == null)
                             return;

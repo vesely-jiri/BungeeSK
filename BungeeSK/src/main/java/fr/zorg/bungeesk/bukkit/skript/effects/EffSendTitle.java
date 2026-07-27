@@ -24,13 +24,13 @@ public class EffSendTitle extends Effect {
 
     static {
         Syntax.effect(EffSendTitle.class, EffSendTitle::new,
-                "send bungee[cord] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayer% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
+                "send [bungee[cord]] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayers% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
     }
 
     private Expression<String> title;
     private Expression<String> subTitle;
     private Expression<Timespan> time;
-    private Expression<BungeePlayer> player;
+    private Expression<BungeePlayer> players;
     private Expression<Timespan> fadeIn;
     private Expression<Timespan> fadeOut;
 
@@ -39,7 +39,7 @@ public class EffSendTitle extends Effect {
         this.title = (Expression<String>) exprs[0];
         this.subTitle = (Expression<String>) exprs[1];
         this.time = (Expression<Timespan>) exprs[2];
-        this.player = (Expression<BungeePlayer>) exprs[3];
+        this.players = (Expression<BungeePlayer>) exprs[3];
         this.fadeIn = (Expression<Timespan>) exprs[4];
         this.fadeOut = (Expression<Timespan>) exprs[5];
         return true;
@@ -47,7 +47,8 @@ public class EffSendTitle extends Effect {
 
     @Override
     protected void execute(Event e) {
-        if (this.player.getSingle(e) == null)
+        final BungeePlayer[] players = this.players.getArray(e);
+        if (players.length == 0)
             return;
 
         final String title = this.title == null ? "NONE" : this.title.getSingle(e);
@@ -56,13 +57,13 @@ public class EffSendTitle extends Effect {
         final Long fadeIn = this.fadeIn == null ? null : this.fadeIn.getSingle(e).getAs(Timespan.TimePeriod.TICK);
         final Long fadeOut = this.fadeOut == null ? null : this.fadeOut.getSingle(e).getAs(Timespan.TimePeriod.TICK);
 
-        final SendTitlePacket packet = new SendTitlePacket(this.player.getSingle(e), title, subTitle, time, fadeIn, fadeOut);
-        PacketClient.sendPacket(packet);
+        for (final BungeePlayer player : players)
+            PacketClient.sendPacket(new SendTitlePacket(player, title, subTitle, time, fadeIn, fadeOut));
     }
 
     @Override
     public String toString(Event e, boolean debug) {
-        return "send title " + this.title.toString(e, debug) + " with subtitle " + this.subTitle.toString(e, debug) + " for " + this.time.toString(e, debug) + " to " + this.player.toString(e, debug);
+        return "send title " + this.title.toString(e, debug) + " to " + this.players.toString(e, debug);
     }
 
 }

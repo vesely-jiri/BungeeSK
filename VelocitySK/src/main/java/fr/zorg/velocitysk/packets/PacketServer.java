@@ -61,7 +61,12 @@ public class PacketServer {
 
     public static void broadcastPacket(BungeeSKPacket packet) {
         clientSockets.forEach(client -> {
-            if (client.getSocket().isConnected())
+            // Only broadcast to fully-authenticated sockets. A socket still mid-handshake may already
+            // have its client side in encrypting mode (the client flips encryption on right after
+            // sending its AuthComplete, before the proxy processes it and flips its own), so a plaintext
+            // broadcast sent into that window is read as an encrypted byte[] on the client and throws a
+            // ClassCastException. A non-authenticated socket isn't a network member yet anyway.
+            if (client.getSocket().isConnected() && client.isAuthenticated())
                 client.sendPacket(packet);
         });
     }

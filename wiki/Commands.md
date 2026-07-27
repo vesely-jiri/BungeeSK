@@ -17,7 +17,7 @@ Controls **this game server's** link to the proxy.
 | `/bungeesk version` | Show the plugin version |
 | `/bungeesk help` | List the subcommands |
 
-## Proxy — `/bungeeskproxy` (alias `/bsproxy`)
+## Proxy — `/bungeeskproxy` (alias `/bskproxy`)
 
 Manages the **proxy's connection listener** and the servers connected to it.
 

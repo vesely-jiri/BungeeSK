@@ -61,11 +61,11 @@ public class BungeeSK {
 
         BungeeSK.getServer().getEventManager().register(this, new BungeeEventsListener());
 
-        // Registered as "bungeeskproxy" (alias "bsproxy"), NOT "bungeesk": on a proxy network the
+        // Registered as "bungeeskproxy" (alias "bskproxy"), NOT "bungeesk": on a proxy network the
         // proxy intercepts a "/bungeesk" it owns and would shadow the game-server-side "/bungeesk"
         // command (leaving it reachable only as "/bungeesk:bungeesk").
         final CommandManager commandManager = BungeeSK.getServer().getCommandManager();
-        BungeeSK.getServer().getCommandManager().register(commandManager.metaBuilder("bungeeskproxy").aliases("bsproxy").plugin(this).build(), new BungeeSKCommand());
+        BungeeSK.getServer().getCommandManager().register(commandManager.metaBuilder("bungeeskproxy").aliases("bskproxy").plugin(this).build(), new BungeeSKCommand());
 
         this.logStartupBanner(System.currentTimeMillis() - startTime);
     }
