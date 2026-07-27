@@ -18,7 +18,10 @@ public class MakeBungeePlayerBungeeCommandListener extends BungeeSKListener {
             final String command = makeBungeePlayerBungeeCommandPacket.getCommand();
             final Player player = VelocityUtils.getManipulablePlayer(bungeePlayer);
             if (player != null)
-                player.spoofChatInput(command.startsWith("/") ? command.substring(1) : command);
+                // Velocity's spoofChatInput only runs as a command when it starts with '/', otherwise it
+                // is sent as chat. Ensure the slash — the old code stripped it, so the player just chatted
+                // the command text instead of executing it.
+                player.spoofChatInput(command.startsWith("/") ? command : "/" + command);
         }
     }
 
