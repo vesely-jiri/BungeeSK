@@ -138,18 +138,21 @@ Immediate reconnect; also re-enables auto-reconnect if a previous disconnect tur
 ### Disconnect — `disconnect (the|this) client`
 Disconnects and disables auto-reconnect.
 
-### Send message — `send bungee message %string% to %bungeeplayer%`
-### Send action bar — `send %bungeeplayer% action bar [message] %string%`
-### Send title — `send bungee[cord] title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayer% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]`
-### Play sound *(2.2.0)* — `(play|send) [bungee] sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayer%`
+> Player-targeted effects take **one player, a list, or a variable** (`%bungeeplayers%`). The ones that would otherwise be shadowed by a built-in Skript effect **require** a `bungee`/`proxy` keyword (interchangeable) — that keyword is what lets a *variable* recipient resolve to BungeeSK. *(2.3.1)*
+
+### Send message — `send (bungee|proxy) message %string% to %bungeeplayers%`
+### Send action bar — `send (bungee|proxy) action bar %string% to %bungeeplayers%`
+### Send title — `send (bungee|proxy) title %string% [with subtitle %-string%] to %bungeeplayers% [for %-timespan%] [with fade[(-| )]in %-timespan%] [(and|with) fade[(-| )]out %-timespan%]`
+Argument order matches Skript's own `send title`.
+### Play sound *(2.2.0)* — `(play|send) (bungee|proxy) sound %string% [(at|with) volume %-number%] [(and|with) pitch %-number%] to %bungeeplayers%`
 Plays a sound (namespaced key, e.g. `entity.experience_orb.pickup`) to a player on any server.
-### Show boss bar *(2.2.0)* — `show boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayer%`
+### Show boss bar *(2.2.0)* — `show [(bungee|proxy)] boss[ ]bar [title] %string% [with colo[u]r %-string%] [with style %-string%] [with progress %-number%] [for %-timespan%] to %bungeeplayers%`
 Shows a timed boss bar (auto-removes) to a player on any server. Colour: pink/blue/red/green/yellow/purple/white; style: solid/segmented_6/…
 
-### Send player to server — `send %bungeeplayer% to %bungeeserver%`
-### Kick player — `kick %bungeeplayer% from bungee[cord] [(due to|because of) %-string%]`
-### Player runs command — `make %bungeeplayer% execute command %string%`
-### Player runs proxy command — `make %bungeeplayer% execute bungee command %string%`
+### Send player to server — `(send|connect) %bungeeplayers% to %bungeeserver%`
+### Kick player — `kick %bungeeplayers% from (bungee[cord]|proxy|[the] network) [(due to|because of) %-string%]`
+### Player runs command — `make %bungeeplayers% execute command %string%` (runs on their current server)
+### Player runs proxy command — `make %bungeeplayers% execute (bungee|proxy) command %string%`
 
 ### Console command — one of:
 - `make bungee[cord] [server] execute console command %string%` (the proxy)

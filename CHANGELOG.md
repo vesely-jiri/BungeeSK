@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.3.1
+
 > **Requires Skript 2.16.0 or newer.** The syntax-registration migration below is built against the Skript 2.16 API (`SyntaxInfo.simple` / `SyntaxRegistry`); on older Skript (2.15.x and earlier) BungeeSK will **not** enable — it throws `NoSuchMethodError: SyntaxInfo.simple` on start and registers no syntax. Update Skript before updating BungeeSK.
 
 ### Breaking changes

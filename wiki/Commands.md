@@ -14,7 +14,7 @@ Controls **this game server's** link to the proxy.
 | `/bungeesk reconnect` | Reconnect to the proxy now |
 | `/bungeesk disconnect` | Disconnect (disables auto-reconnect until you reconnect) |
 | `/bungeesk reload` | Reload `config.yml` and re-apply the connection |
-| `/bungeesk version` | Show the plugin version |
+| `/bungeesk version` | Show the plugin version + build (git commit) |
 | `/bungeesk help` | List the subcommands |
 
 ## Proxy — `/bungeeskproxy` (alias `/bskproxy`)
@@ -29,6 +29,7 @@ Manages the **proxy's connection listener** and the servers connected to it.
 | `/bungeeskproxy stop` | Stop the listener |
 | `/bungeeskproxy restart` | Restart the listener |
 | `/bungeeskproxy reload` | Reload `config.yml` and restart the listener |
+| `/bungeeskproxy version` | Show the plugin version + build (git commit) |
 | `/bungeeskproxy help` | List the subcommands |
 
 ## Why two names?
