@@ -15,6 +15,17 @@ and afterwards **every** BungeeSK line in your scripts reports *Can't understand
 
 **Fix:** update [Skript](https://github.com/SkriptLang/Skript/releases/latest) to **2.16.0 or newer** and restart. Check the running version with `/skript info` (or `/sk info`).
 
+## A player effect (action bar / title / message / sound) stopped working after 2.3.1
+
+2.3.1 redesigned the player-targeted effects (old forms removed). If one no longer parses (*Can't understand*), or `send action bar "…" to {_player}` silently does nothing, add the `bungee` (or `proxy`) keyword:
+
+```applescript
+send bungee action bar "&aHi" to {_player}      # not: send action bar "&aHi" to {_player}
+send proxy title "&6Hi" to all bungee players
+```
+
+The keyword is **required** on the effects that share a name with a built-in Skript effect (`send message` / `send action bar` / `send title` / `play sound`). Without it, a **variable** recipient is grabbed by Skript's own effect instead of BungeeSK's — which is why the plain form can parse yet do nothing. `bungee` and `proxy` are interchangeable. Also: `connect <players> to <server>`, `kick <players> from the network`, `make <players> execute proxy command "…"`. See **[Skript Syntax](Skript-Syntax)** for the full list.
+
 ## The game server never connects
 
 - **Port / password mismatch.** The `port` and `password` must be **identical** on the proxy and every game server. A wrong password fails the handshake.
