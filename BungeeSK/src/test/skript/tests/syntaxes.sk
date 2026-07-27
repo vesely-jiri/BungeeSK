@@ -70,7 +70,7 @@ on script load:
 		send bungee action bar "a" to bungee player named "Notch"
 		send proxy action bar "a" to all bungee players
 		send bungee action bar "a" to {_target}
-		send bungee title "a" with subtitle "b" for 3 seconds to bungee player named "Notch" with fade-in 10 ticks and fade-out 2 seconds
+		send bungee title "a" with subtitle "b" to bungee player named "Notch" for 3 seconds with fade in 10 ticks and fade out 2 seconds
 		play bungee sound "entity.experience_orb.pickup" with volume 1 and pitch 2 to all bungee players
 		send proxy sound "block.note_block.pling" to bungee player named "Notch"
 		show boss bar "hi" with colour "green" for 5 seconds to bungee player named "Notch"

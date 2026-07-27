@@ -18,13 +18,13 @@ import org.bukkit.event.Event;
 @Name("Send Bungeecord title to bungee player")
 @Description({"Send a Bungeecord title to a player on the network",
         "Note: reaches players even on servers without BungeeSK, unless 'affect_all_servers' is disabled in the proxy config."})
-@Examples("send bungeecord title \"&cHey you !\" with subtitle \"&6How are you ? :)\" for 3 seconds to bungee player named \"Notch\" with fade-in 10 ticks and fade-out 2 seconds")
+@Examples("send bungee title \"&cHey you !\" with subtitle \"&6How are you ? :)\" to bungee player named \"Notch\" for 3 seconds with fade in 10 ticks and fade out 2 seconds")
 @Since("1.1.0")
 public class EffSendTitle extends Effect {
 
     static {
         Syntax.effect(EffSendTitle.class, EffSendTitle::new,
-                "send (bungee|proxy) title %string% [with subtitle %-string%] [for %-timespan%] to %bungeeplayers% [with fade-in %-timespan%] [(and|with) fade-out %-timespan%]");
+                "send (bungee|proxy) title %string% [with subtitle %-string%] to %bungeeplayers% [for %-timespan%] [with fade[(-| )]in %-timespan%] [(and|with) fade[(-| )]out %-timespan%]");
     }
 
     private Expression<String> title;
@@ -38,8 +38,8 @@ public class EffSendTitle extends Effect {
     public boolean init(Expression<?>[] exprs, int pattern, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
         this.title = (Expression<String>) exprs[0];
         this.subTitle = (Expression<String>) exprs[1];
-        this.time = (Expression<Timespan>) exprs[2];
-        this.players = (Expression<BungeePlayer>) exprs[3];
+        this.players = (Expression<BungeePlayer>) exprs[2];
+        this.time = (Expression<Timespan>) exprs[3];
         this.fadeIn = (Expression<Timespan>) exprs[4];
         this.fadeOut = (Expression<Timespan>) exprs[5];
         return true;

@@ -11,7 +11,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 public class SendTitleListener extends BungeeSKListener {
 
@@ -25,45 +24,31 @@ public class SendTitleListener extends BungeeSKListener {
             if (player == null)
                 return;
 
-            Title title;
             final Component titleComponent = VelocityUtils.getTextComponent(sendTitlePacket.getTitle());
             final Component subTitle = sendTitlePacket.getSubTitle() == null ? Component.empty() : VelocityUtils.getTextComponent(sendTitlePacket.getSubTitle());
-            Title.Times times;
 
+            final Title title;
             if (sendTitlePacket.getTime() != null) {
-                if (sendTitlePacket.getFadeIn() != null && sendTitlePacket.getFadeOut() != null) {
-                    times = Title.Times.times(
-                            Duration.of(sendTitlePacket.getFadeIn().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.of(sendTitlePacket.getTime().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.of(sendTitlePacket.getFadeOut().intValue(), TimeUnit.SECONDS.toChronoUnit())
-                    );
-                } else if (sendTitlePacket.getFadeIn() != null) {
-                    times = Title.Times.times(
-                            Duration.of(sendTitlePacket.getFadeIn().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.of(sendTitlePacket.getTime().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.ZERO
-                    );
-                } else if (sendTitlePacket.getFadeOut() != null) {
-                    times = Title.Times.times(
-                            Duration.ZERO,
-                            Duration.of(sendTitlePacket.getTime().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.of(sendTitlePacket.getFadeOut().intValue(), TimeUnit.SECONDS.toChronoUnit())
-                    );
-                } else {
-                    times = Title.Times.times(
-                            Duration.ZERO,
-                            Duration.of(sendTitlePacket.getTime().intValue(), TimeUnit.SECONDS.toChronoUnit()),
-                            Duration.ZERO
-                    );
-                }
+                // BungeeSK sends the timings in ticks (1 tick = 50 ms); Adventure wants Durations. The old
+                // code fed the tick count straight into Duration.of(..., SECONDS), so "for 2 seconds" (40
+                // ticks) actually displayed for 40 seconds.
+                final Title.Times times = Title.Times.times(
+                        ticksToDuration(sendTitlePacket.getFadeIn(), 10L),
+                        ticksToDuration(sendTitlePacket.getTime(), 70L),
+                        ticksToDuration(sendTitlePacket.getFadeOut(), 20L));
                 title = Title.title(titleComponent, subTitle, times);
-
             } else {
                 title = Title.title(titleComponent, subTitle);
             }
 
             player.showTitle(title);
         }
+    }
+
+    private static Duration ticksToDuration(Long ticks, long defaultTicks) {
+        // BungeeSK sends title timings in ticks; Adventure wants a Duration (1 tick = 50 ms). Fall back
+        // to the vanilla defaults (fade-in 10, stay 70, fade-out 20 ticks) when a value is unset.
+        return Duration.ofMillis((ticks == null ? defaultTicks : ticks) * 50L);
     }
 
 }
