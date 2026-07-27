@@ -3,6 +3,7 @@ package fr.zorg.velocitysk.commands;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+import fr.zorg.bungeesk.common.BuildInfo;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import fr.zorg.velocitysk.packets.PacketServer;
 import fr.zorg.velocitysk.packets.SocketServer;
@@ -23,7 +24,7 @@ public class BungeeSKCommand implements SimpleCommand {
     public static final String PREFIX = "§6BungeeSK §7» ";
 
     private static final List<String> SUBCOMMANDS = Arrays.asList(
-            "help", "servers", "disconnect", "start", "stop", "restart", "reload");
+            "help", "servers", "disconnect", "start", "stop", "restart", "reload", "version");
 
     @Override
     public void execute(Invocation invocation) {
@@ -42,6 +43,9 @@ public class BungeeSKCommand implements SimpleCommand {
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
             sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §dreload§e: §7Reload config.yml and restart the connection listener"));
+            sender.sendMessage(VelocityUtils.getTextComponent("  §8» §6/§fbungeeskproxy §3version§e: §7Show the plugin version and build"));
+        } else if (args[0].equalsIgnoreCase("version")) {
+            sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§7Running version §f" + BuildInfo.describe()));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(VelocityUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));

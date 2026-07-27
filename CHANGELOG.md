@@ -38,6 +38,7 @@
 - CI test jobs now reuse the jar the build job produces (the actual shipped universal jar) instead of each rebuilding it, and cache the downloaded server jars.
 - The game-server startup banner is tidied: the auto-connect and PlaceholderAPI lines are folded into the coloured enable summary instead of being printed as separate uncoloured lines around it, and the banner is printed before the connection opens so the async connection result lands just below it.
 - The jar artifact is uploaded with `compression-level: 0` — it is already a compressed zip, so storing it skips a pointless re-deflate (the download is a zip container either way).
+- The version commands now report the exact build. `/bungeesk version` (and a new `/bungeeskproxy version` on both proxies) print `2.3.x (git <sha>, built <time>)` — the short git commit + build time are baked into the jar at build — so you can confirm which build (e.g. a dev build) is actually running.
 
 ## 2.3.0
 

@@ -3,6 +3,7 @@ package fr.zorg.bungeesk.bukkit.commands;
 import fr.zorg.bungeesk.bukkit.BungeeSK;
 import fr.zorg.bungeesk.bukkit.packets.PacketClient;
 import fr.zorg.bungeesk.bukkit.utils.BungeeSKConfig;
+import fr.zorg.bungeesk.common.BuildInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -60,7 +61,7 @@ public class BungeeSKCommand implements CommandExecutor, TabCompleter {
                 break;
             }
             case "version": {
-                sender.sendMessage(PREFIX + color("&7Running version &f" + BungeeSK.getInstance().getDescription().getVersion()));
+                sender.sendMessage(PREFIX + color("&7Running version &f" + BuildInfo.describe()));
                 break;
             }
             case "help":

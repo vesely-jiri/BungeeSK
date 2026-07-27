@@ -4,6 +4,7 @@ import fr.zorg.bungeesk.bungee.packets.PacketServer;
 import fr.zorg.bungeesk.bungee.packets.SocketServer;
 import fr.zorg.bungeesk.bungee.utils.BungeeConfig;
 import fr.zorg.bungeesk.bungee.utils.BungeeUtils;
+import fr.zorg.bungeesk.common.BuildInfo;
 import fr.zorg.bungeesk.common.entities.BungeeServer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -27,7 +28,7 @@ public class BungeeSKCommand extends Command implements TabExecutor, Listener {
     public static final String PREFIX = "§6BungeeSK §7» ";
 
     private static final List<String> SUBCOMMANDS = Arrays.asList(
-            "help", "servers", "disconnect", "start", "stop", "restart", "reload");
+            "help", "servers", "disconnect", "start", "stop", "restart", "reload", "version");
 
     public BungeeSKCommand() {
         // Named "bungeeskproxy" (alias "bskproxy") so it does not collide with the game-server-side
@@ -49,6 +50,9 @@ public class BungeeSKCommand extends Command implements TabExecutor, Listener {
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §cdisconnect <IP:PORT / ALL>§e: §7Disconnect a specific server under BungeeSK"));
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §a<start|stop|restart>§e: §7Start, stop or restart BungeeSK"));
             sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §dreload§e: §7Reload config.yml and restart the connection listener"));
+            sender.sendMessage(BungeeUtils.getTextComponent("  §8» §6/§fbungeeskproxy §3version§e: §7Show the plugin version and build"));
+        } else if (args[0].equalsIgnoreCase("version")) {
+            sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§7Running version §f" + BuildInfo.describe()));
         } else if (args[0].equalsIgnoreCase("servers")) {
             if (PacketServer.getServerSocket() == null) {
                 sender.sendMessage(BungeeUtils.getTextComponent(PREFIX + "§cBungeeSK is currently stopped"));

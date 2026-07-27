@@ -51,6 +51,35 @@ tasks.named("test") {
     useJUnitPlatform()
 }
 
+// Bake the short git commit + build time into a resource (bungeesk-build.properties) so the version
+// commands can report exactly which build is running — useful for confirming a dev build. Generated at
+// execution time (configuration-cache safe) and always regenerated so the commit/time stay current. If
+// git is unavailable the commit falls back to "unknown".
+def buildInfoDir = layout.buildDirectory.dir("generated/buildinfo")
+def buildInfoRepoDir = rootProject.projectDir
+def buildInfoVersion = project.version.toString()
+tasks.register("generateBuildInfo") {
+    def outFile = buildInfoDir.map { it.file("bungeesk-build.properties") }
+    outputs.file(outFile)
+    outputs.upToDateWhen { false }
+    doLast {
+        def commit = "unknown"
+        try {
+            def proc = ["git", "rev-parse", "--short", "HEAD"].execute(null, buildInfoRepoDir)
+            proc.waitForOrKill(5000)
+            def text = proc.in.text.trim()
+            if (proc.exitValue() == 0 && !text.isEmpty()) commit = text
+        } catch (ignored) {
+        }
+        def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+        def file = outFile.get().asFile
+        file.parentFile.mkdirs()
+        file.text = "version=${buildInfoVersion}\ncommit=${commit}\nbuildTime=${buildTime}\n"
+    }
+}
+sourceSets.main.resources.srcDir(buildInfoDir)
+tasks.named("processResources") { dependsOn("generateBuildInfo") }
+
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 shadowJar {
